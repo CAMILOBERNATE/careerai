@@ -1,0 +1,54 @@
+:root {
+  --verde: #39A900;
+  --verde2: #2d8a00;
+  --azul: #003DA5;
+  --azul2: #002d7a;
+  --naranja: #FF6B00;
+  --naranja2: #e05e00;
+  --blanco: #ffffff;
+  --gris: #f5f5f5;
+  --gris2: #e0e0e0;
+  --texto: #1a1a1a;
+  --texto2: #555555;
+  --sombra: 0 4px 20px rgba(0,0,0,0.1);
+  --radio: 12px;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { font-size: 16px; -webkit-font-smoothing: antialiased; }
+
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: var(--gris);
+  color: var(--texto);
+  min-height: 100vh;
+}
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: var(--gris); }
+::-webkit-scrollbar-thumb { background: var(--verde); border-radius: 99px; }
+
+a { text-decoration: none; color: inherit; }
+button, input, textarea, select { font-family: inherit; font-size: inherit; outline: none; }
+select option { background: white; color: var(--texto); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes blink {
+  0%, 60%, 100% { opacity: 0.25; transform: translateY(0); }
+  30% { opacity: 1; transform: translateY(-4px); }
+}
+
+.fade-up { animation: fadeUp 0.35s ease both; }
