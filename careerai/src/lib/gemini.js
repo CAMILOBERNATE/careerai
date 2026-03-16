@@ -1,5 +1,5 @@
 const API_KEY = import.meta.env.VITE_GEMINI_KEY              
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent'
+const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent'
 
 
 const SISTEMA = `Eres un asistente laboral experto del SENA Colombia. 
