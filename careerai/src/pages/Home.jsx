@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { preguntarGemini } from '../lib/gemini.js'
 
@@ -10,18 +10,37 @@ const MODULOS = [
   { path: '/tips',       icon: '💡', title: 'Tips y Consejos',    color: '#795548' },
 ]
 
+function formatearTexto(texto) {
+  return texto
+    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+    .replace(/\n\n/g, '<br/><br/>')
+    .replace(/\n/g, '<br/>')
+}
+
 export default function Home() {
   const navigate = useNavigate()
+  const [mensajes, setMensajes] = useState([{
+    role: 'bot',
+    text: '¡Hola! 🐾 Soy <strong>Ruti</strong>, tu asistente laboral del SENA. ¿En qué te puedo ayudar hoy?'
+  }])
   const [input, setInput] = useState('')
-  const [respuesta, setRespuesta] = useState('')
   const [cargando, setCargando] = useState(false)
+  const bottomRef = useRef()
 
-  const preguntar = async () => {
-    if (!input.trim() || cargando) return
+  useEffect(() => {
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }, [mensajes])
+
+  const preguntar = async (texto) => {
+    const msg = texto || input
+    if (!msg.trim() || cargando) return
+    setInput('')
+    setMensajes(m => [...m, { role: 'user', text: msg }])
     setCargando(true)
-    setRespuesta('')
-    const res = await preguntarGemini([{ role: 'user', text: input }])
-    setRespuesta(res)
+    const historial = [...mensajes, { role: 'user', text: msg }]
+    const res = await preguntarGemini(historial)
+    setMensajes(m => [...m, { role: 'bot', text: formatearTexto(res) }])
     setCargando(false)
   }
 
@@ -37,8 +56,6 @@ export default function Home() {
 
       {/* Ruti centrado con bocadillo */}
       <div style={{ position: 'relative', marginBottom: 16, marginTop: 20 }}>
-
-        {/* Bocadillo */}
         <div style={{
           position: 'absolute',
           top: -70, left: '50%',
@@ -51,13 +68,9 @@ export default function Home() {
           border: '2px solid var(--verde)',
           zIndex: 2,
         }}>
-          <span style={{
-            fontSize: 16, fontWeight: 800,
-            color: 'var(--azul)',
-          }}>
+          <span style={{ fontSize: 16, fontWeight: 800, color: 'var(--azul)' }}>
             ¡Consigue ese trabajo que mereces! 💼
           </span>
-          {/* Triángulo */}
           <div style={{
             position: 'absolute',
             bottom: -12, left: '50%',
@@ -78,7 +91,6 @@ export default function Home() {
           }} />
         </div>
 
-        {/* Perrito */}
         <div style={{
           width: 110, height: 110,
           borderRadius: '50%',
@@ -92,11 +104,7 @@ export default function Home() {
           🐶
         </div>
 
-        {/* Huellas debajo */}
-        <div style={{
-          display: 'flex', justifyContent: 'center',
-          gap: 4, marginTop: 10,
-        }}>
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 4, marginTop: 10 }}>
           {[0,1,2,3,4].map(i => (
             <span key={i} style={{
               fontSize: 14, color: '#795548',
@@ -108,25 +116,96 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Nombre */}
-      <div style={{
-        fontWeight: 800, fontSize: 15,
-        color: 'var(--azul)', marginBottom: 4,
-      }}>
+      <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--azul)', marginBottom: 4 }}>
         Ruti — Asistente Laboral IA
       </div>
 
-      {/* Campo de pregunta */}
+      {/* Chat tipo conversación */}
       <div style={{
-        width: '100%', maxWidth: 560,
-        marginBottom: 12, marginTop: 8,
+        width: '100%', maxWidth: 580,
+        background: 'white',
+        borderRadius: 16,
+        border: '1px solid var(--gris2)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.06)',
+        marginTop: 12, marginBottom: 16,
+        overflow: 'hidden',
       }}>
+        {/* Mensajes */}
+        <div style={{
+          maxHeight: 320,
+          overflowY: 'auto',
+          padding: '16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 12,
+        }}>
+          {mensajes.map((m, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              gap: 8,
+              flexDirection: m.role === 'user' ? 'row-reverse' : 'row',
+              animation: 'fadeUp 0.3s ease',
+            }}>
+              <div style={{
+                width: 32, height: 32,
+                borderRadius: 10, flexShrink: 0,
+                display: 'flex', alignItems: 'center',
+                justifyContent: 'center', fontSize: 16,
+                background: m.role === 'user' ? 'var(--azul)' : 'var(--verde)',
+              }}>
+                {m.role === 'user' ? '👤' : '🐶'}
+              </div>
+              <div style={{
+                maxWidth: '78%',
+                padding: '10px 14px',
+                borderRadius: 12,
+                fontSize: 13,
+                lineHeight: 1.65,
+                background: m.role === 'user' ? 'var(--azul)' : 'var(--gris)',
+                color: m.role === 'user' ? 'white' : 'var(--texto)',
+                borderTopLeftRadius: m.role === 'user' ? 12 : 4,
+                borderTopRightRadius: m.role === 'user' ? 4 : 12,
+                border: m.role === 'user' ? 'none' : '1px solid var(--gris2)',
+              }}>
+                <span dangerouslySetInnerHTML={{ __html: m.text }} />
+              </div>
+            </div>
+          ))}
+          {cargando && (
+            <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{
+                width: 32, height: 32, borderRadius: 10,
+                background: 'var(--verde)',
+                display: 'flex', alignItems: 'center',
+                justifyContent: 'center', fontSize: 16,
+              }}>🐶</div>
+              <div style={{
+                padding: '10px 14px',
+                background: 'var(--gris)',
+                border: '1px solid var(--gris2)',
+                borderRadius: 12, borderTopLeftRadius: 4,
+                display: 'flex', gap: 4, alignItems: 'center',
+              }}>
+                {[0,1,2].map(i => (
+                  <span key={i} style={{
+                    width: 6, height: 6, borderRadius: '50%',
+                    background: 'var(--verde)',
+                    display: 'inline-block',
+                    animation: `blink 1.2s ${i * 0.2}s infinite`,
+                  }}/>
+                ))}
+              </div>
+            </div>
+          )}
+          <div ref={bottomRef} />
+        </div>
+
+        {/* Input */}
         <div style={{
           display: 'flex', gap: 8,
+          padding: '10px 12px',
+          borderTop: '1px solid var(--gris2)',
           background: 'white',
-          border: '2px solid var(--verde)',
-          borderRadius: 99, padding: '6px 6px 6px 20px',
-          boxShadow: '0 4px 20px rgba(57,169,0,0.15)',
         }}>
           <input
             value={input}
@@ -134,56 +213,32 @@ export default function Home() {
             onKeyDown={e => e.key === 'Enter' && preguntar()}
             placeholder="Pregúntale algo a Ruti sobre tu carrera..."
             style={{
-              flex: 1, border: 'none', background: 'transparent',
-              fontSize: 14, color: 'var(--texto)',
-              outline: 'none',
+              flex: 1, border: '1px solid var(--gris2)',
+              background: 'var(--gris)',
+              borderRadius: 99, fontSize: 13,
+              color: 'var(--texto)', outline: 'none',
+              padding: '9px 16px',
             }}
           />
           <button
-            onClick={preguntar}
+            onClick={() => preguntar()}
             disabled={cargando || !input.trim()}
             style={{
-              padding: '10px 22px',
+              padding: '9px 18px',
               background: cargando || !input.trim() ? 'var(--gris2)' : 'var(--verde)',
               border: 'none', borderRadius: 99,
               color: 'white', fontWeight: 700,
               fontSize: 13, cursor: cargando || !input.trim() ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s',
-              whiteSpace: 'nowrap',
+              transition: 'all 0.2s', whiteSpace: 'nowrap',
             }}
           >
-            {cargando ? '⏳' : 'Preguntar 🐾'}
+            {cargando ? '⏳' : 'Enviar 🐾'}
           </button>
         </div>
-
-        {/* Respuesta de Ruti */}
-        {(respuesta || cargando) && (
-          <div style={{
-            marginTop: 12,
-            background: 'white',
-            border: '1px solid var(--gris2)',
-            borderLeft: '4px solid var(--verde)',
-            borderRadius: 12, padding: '14px 18px',
-            fontSize: 14, color: 'var(--texto)',
-            lineHeight: 1.7,
-            boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-          }}>
-            {cargando ? (
-              <span style={{ color: 'var(--texto2)' }}>
-                🐾 Ruti está pensando...
-              </span>
-            ) : (
-              <>
-                <span style={{ fontWeight: 700, color: 'var(--verde)' }}>🐶 Ruti: </span>
-                {respuesta}
-              </>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Módulos en forma de huellas */}
-      <div style={{ marginTop: 24, width: '100%', maxWidth: 640 }}>
+      <div style={{ width: '100%', maxWidth: 640 }}>
         <div style={{
           fontSize: 12, fontWeight: 700,
           color: '#795548', textTransform: 'uppercase',
@@ -204,42 +259,31 @@ export default function Home() {
               style={{
                 display: 'flex', flexDirection: 'column',
                 alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer', transition: 'all 0.2s',
-                gap: 6,
+                cursor: 'pointer', transition: 'all 0.2s', gap: 6,
               }}
               onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-4px) scale(1.05)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'none'}
             >
-              {/* Huella */}
               <div style={{
                 width: 80, height: 88,
                 position: 'relative',
                 display: 'flex', alignItems: 'center',
                 justifyContent: 'center',
               }}>
-                {/* SVG huella de perro */}
                 <svg width="80" height="88" viewBox="0 0 80 88" fill="none">
-                  {/* Almohadilla principal */}
                   <ellipse cx="40" cy="60" rx="28" ry="22" fill="#795548" opacity="0.85"/>
-                  {/* Deditos */}
                   <ellipse cx="18" cy="38" rx="10" ry="13" fill="#795548" opacity="0.85"/>
                   <ellipse cx="34" cy="30" rx="10" ry="13" fill="#795548" opacity="0.85"/>
                   <ellipse cx="50" cy="30" rx="10" ry="13" fill="#795548" opacity="0.85"/>
                   <ellipse cx="64" cy="38" rx="10" ry="13" fill="#795548" opacity="0.85"/>
                 </svg>
-                {/* Emoji encima */}
-                <div style={{
-                  position: 'absolute',
-                  fontSize: 22,
-                  marginTop: 14,
-                }}>
+                <div style={{ position: 'absolute', fontSize: 22, marginTop: 14 }}>
                   {m.icon}
                 </div>
               </div>
               <div style={{
                 fontSize: 11, fontWeight: 700,
-                color: '#5D4037', textAlign: 'center',
-                maxWidth: 80,
+                color: '#5D4037', textAlign: 'center', maxWidth: 80,
               }}>
                 {m.title}
               </div>
