@@ -8,6 +8,7 @@ import Entrevista from './pages/Entrevista.jsx'
 import Chat from './pages/Chat.jsx'
 import Tips from './pages/Tips.jsx'
 import Admin from './pages/Admin.jsx'
+import Plantillas from './pages/Plantillas.jsx'
 
 function Layout({ children }) {
   return (
@@ -29,6 +30,7 @@ export default function App() {
       <Route path="/chat" element={<Layout><Chat /></Layout>} />
       <Route path="/tips" element={<Layout><Tips /></Layout>} />
       <Route path="/admin" element={<Layout><Admin /></Layout>} />
+      <Route path="/plantillas" element={<Layout><Plantillas /></Layout>} />
     </Routes>
   )
 }

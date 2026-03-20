@@ -7,6 +7,7 @@ const NAV = [
   { to: '/entrevista',  icon: '🎯', label: 'Simular Entrevista' },
   { to: '/chat',        icon: '💬', label: 'Chat Laboral' },
   { to: '/tips',        icon: '💡', label: 'Tips y Consejos' },
+  { to: '/plantillas',  icon: '🎨', label: 'Plantillas' },
   { to: '/admin',       icon: '🔐', label: 'Admin Plantillas' },
 ]
 
