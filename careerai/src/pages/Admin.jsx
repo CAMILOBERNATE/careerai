@@ -57,9 +57,19 @@ export default function Admin() {
     cargarPlantillas()
   }
 
-  const entrar = () => {
-    if (password === CLAVE) { setAutenticado(true); setError('') }
-    else setError('❌ Contraseña incorrecta')
+  const entrar = async () => {
+    if (!password.trim()) { setError('⚠️ Escribe tu correo'); return }
+    const { data } = await supabase
+      .from('admins')
+      .select('*')
+      .eq('email', password.trim().toLowerCase())
+      .single()
+    if (data && (data.activo === true || data.activo === 'True' || data.activo === 'true')) {
+      setAutenticado(true)
+      setError('')
+    } else {
+      setError('❌ Correo no autorizado. Contacta a Camilo.')
+    }
   }
 
   if (!autenticado) {
@@ -70,13 +80,13 @@ export default function Admin() {
           <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--azul)', marginBottom: 4 }}>Panel Administrador</h2>
           <p style={{ fontSize: 13, color: 'var(--texto2)', marginBottom: 24 }}>Solo para el equipo de diseño</p>
           <input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && entrar()}
-            placeholder="Contraseña"
-            style={{ width: '100%', padding: '11px 14px', background: 'var(--gris)', border: '1px solid var(--gris2)', borderRadius: 9, fontSize: 14, color: 'var(--texto)', marginBottom: 12, textAlign: 'center', letterSpacing: '0.2em' }}
-          />
+              type="email"
+              value={password}
+              onChange={e => setPassword(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && entrar()}
+              placeholder="Tu correo @sena.edu.co"
+              style={{ width: '100%', padding: '11px 14px', background: 'var(--gris)', border: '1px solid var(--gris2)', borderRadius: 9, fontSize: 14, color: 'var(--texto)', marginBottom: 12, textAlign: 'center' }}
+            />
           {error && <div style={{ fontSize: 13, color: '#ff4444', marginBottom: 12 }}>{error}</div>}
           <button onClick={entrar} style={{ width: '100%', padding: '11px', background: 'var(--azul)', border: 'none', borderRadius: 9, color: 'var(--blanco)', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>
             Entrar →
