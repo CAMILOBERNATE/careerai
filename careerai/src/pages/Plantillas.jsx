@@ -14,7 +14,7 @@ export default function Plantillas() {
 
   const cargar = async () => {
     setCargando(true)
-    const { data } = await supabase.from('plantillas').select('*').order('id', { ascending: false })
+    const { data } = await supabase.from('plantillas').select('*')
     setPlantillas(data || [])
     setCargando(false)
   }
