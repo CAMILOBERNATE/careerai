@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 
 const MENSAJES = [
-  '¡Hola! Soy Ruti 🐾',
+  '¡Hola! Soy Rutti 🐾',
   'Soy tu guía laboral del SENA...',
   'Te ayudaré a conseguir ese trabajo que mereces 💼',
   '¿Listo para empezar? ¡Vamos! 🚀',
@@ -93,7 +93,7 @@ export default function Bienvenida() {
       {/* Contenido central */}
       <div style={{ textAlign: 'center', maxWidth: 480, zIndex: 1 }}>
 
-        {/* Perrito Ruti */}
+        {/* Perrito Rutti */}
         <div style={{ position: 'relative', display: 'inline-block', marginBottom: 24 }}>
 
           {/* Bocadillo de texto */}
@@ -171,7 +171,7 @@ export default function Bienvenida() {
           color: 'white', letterSpacing: -1,
           marginBottom: 8, marginTop: 16,
         }}>
-          Ruti
+          Rutti
         </h1>
         <p style={{
           fontSize: 15, color: 'rgba(255,255,255,0.6)',

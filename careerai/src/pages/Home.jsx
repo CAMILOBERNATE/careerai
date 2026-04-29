@@ -22,7 +22,7 @@ export default function Home() {
   const navigate = useNavigate()
   const [mensajes, setMensajes] = useState([{
     role: 'bot',
-    text: '¡Hola! 🐾 Soy <strong>Ruti</strong>, tu asistente laboral del SENA. ¿En qué te puedo ayudar hoy?'
+    text: '¡Hola! 🐾 Soy <strong>Rutti</strong>, tu asistente laboral del SENA. ¿En qué te puedo ayudar hoy?'
   }])
   const [input, setInput] = useState('')
   const [cargando, setCargando] = useState(false)
@@ -54,7 +54,7 @@ export default function Home() {
       padding: '40px 24px',
     }}>
 
-      {/* Ruti centrado con bocadillo */}
+      {/* Rutti centrado con bocadillo */}
       <div style={{ position: 'relative', marginBottom: 16, marginTop: 20 }}>
         <div style={{
           position: 'absolute',
@@ -117,7 +117,7 @@ export default function Home() {
       </div>
 
       <div style={{ fontWeight: 800, fontSize: 15, color: 'var(--azul)', marginBottom: 4 }}>
-        Ruti — Asistente Laboral IA
+        Rutti — Asistente Laboral IA
       </div>
 
       {/* Chat tipo conversación */}
@@ -211,7 +211,7 @@ export default function Home() {
             value={input}
             onChange={e => setInput(e.target.value)}
             onKeyDown={e => e.key === 'Enter' && preguntar()}
-            placeholder="Pregúntale algo a Ruti sobre tu carrera..."
+            placeholder="Pregúntale algo a Rutti sobre tu carrera..."
             style={{
               flex: 1, border: '1px solid var(--gris2)',
               background: 'var(--gris)',
