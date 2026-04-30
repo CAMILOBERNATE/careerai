@@ -1,8 +1,7 @@
-const API_KEY = import.meta.env.VITE_GEMINI_KEY              
-const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent'
+const API_KEY = import.meta.env.VITE_GEMINI_KEY
+const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent'
 
-
-const SISTEMA = `Eres Ruti, asistente virtual laboral del SENA Colombia. 
+const SISTEMA = `Eres Rutti, asistente virtual laboral del SENA Colombia. 
 Respondes preguntas relacionadas con:
 - Hojas de vida y CV
 - Entrevistas de trabajo
@@ -51,7 +50,7 @@ export async function mejorarTexto(texto, tipo) {
     const prompt = `Mejora este texto de hoja de vida para que sea más profesional y orientado a resultados. 
 Tipo de sección: ${tipo}
 Texto original: "${texto}"
-Responde SOLO con el texto mejorado, sin explicaciones.`
+Responde SOLO con el texto mejorado, sin explicaciones ni comillas.`
 
     const res = await fetch(`${API_URL}?key=${API_KEY}`, {
       method: 'POST',
@@ -89,7 +88,7 @@ export async function analizarCV(textoCV, oferta = '') {
 Hoja de vida: ${textoCV}
 ${oferta ? `Oferta de trabajo: ${oferta}` : ''}
 
-Responde SOLO con el JSON, sin texto extra.`
+Responde SOLO con el JSON, sin texto extra ni markdown.`
 
     const res = await fetch(`${API_URL}?key=${API_KEY}`, {
       method: 'POST',
