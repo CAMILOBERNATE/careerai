@@ -83,7 +83,7 @@ IMPORTANTE:
                   { text: prompt }
                 ]
               }],
-              generationConfig: { temperature: 0.1, maxOutputTokens: 3000 }
+              generationConfig: { temperature: 0.1, maxOutputTokens: 8192 }
             })
           }
         )
@@ -100,9 +100,35 @@ IMPORTANTE:
         const text = data?.candidates?.[0]?.content?.parts?.[0]?.text || ''
         if (!text) throw new Error('Respuesta vacía de Gemini')
 
-        const clean = text.replace(/```json|```/g, '').trim()
-        const parsed = JSON.parse(clean)
-        resolve(parsed)
+        // Limpiar y parsear JSON
+        let clean = text.replace(/```json|```/g, '').trim()
+
+        // Si el JSON está cortado, intentar cerrarlo
+        try {
+          const parsed = JSON.parse(clean)
+          resolve(parsed)
+        } catch(parseErr) {
+          // Intentar reparar JSON cortado
+          console.warn('JSON incompleto, intentando reparar...')
+          // Contar llaves y corchetes abiertos
+          let depth = 0, arrDepth = 0
+          for (const ch of clean) {
+            if (ch === '{') depth++
+            else if (ch === '}') depth--
+            else if (ch === '[') arrDepth++
+            else if (ch === ']') arrDepth--
+          }
+          // Cerrar lo que falta
+          let repaired = clean
+          for (let i = 0; i < arrDepth; i++) repaired += ']'
+          for (let i = 0; i < depth; i++) repaired += '}'
+          try {
+            const parsed = JSON.parse(repaired)
+            resolve(parsed)
+          } catch(e2) {
+            throw new Error('No se pudo parsear la respuesta de Gemini')
+          }
+        }
 
       } catch (err) {
         console.error('Error completo:', err)
