@@ -198,28 +198,39 @@ function MiniPreview({ d, pid, color, fuente }) {
     </div>
   )
 
-  // Sidebar para las demás
+  // Sidebar para las demás — SIN foto, SIN duplicados
   const isDark = pid==='p3'
   const bg = isDark ? '#2b2b2b' : color
+  const habsArr = habs.split(',').slice(0,6).map(h=>h.trim()).filter(Boolean)
   return (
     <div style={{ width:'100%', height:'100%', fontFamily:ff, background:'#fff', display:'flex', overflow:'hidden' }}>
-      <div style={{ width:'32%', background:bg, padding:'7px 5px', display:'flex', flexDirection:'column', alignItems:'center' }}>
-        {d.fotoBase64
-          ? <div style={{ width:34,height:34,borderRadius:'50%',overflow:'hidden',marginBottom:4,border:'1.5px solid rgba(255,255,255,0.4)' }}><img src={d.fotoBase64} style={{ width:'100%',height:'100%',objectFit:'cover' }}/></div>
-          : <div style={{ width:34,height:34,borderRadius:'50%',background:'rgba(255,255,255,0.15)',marginBottom:4,display:'flex',alignItems:'center',justifyContent:'center',fontSize:14,color:'rgba(255,255,255,0.4)' }}>👤</div>
-        }
-        <div style={{ fontSize:6,fontWeight:700,color:'#fff',textAlign:'center',marginBottom:2,lineHeight:1.2 }}>{d.nombre||'Nombre'}</div>
-        <div style={{ fontSize:5,color:'rgba(255,255,255,0.7)',textAlign:'center',marginBottom:4 }}>{d.cargo||''}</div>
-        {d.telefono&&<div style={{ fontSize:5,color:'rgba(255,255,255,0.75)',marginBottom:1.5 }}>{d.telefono}</div>}
-        {d.ciudad&&<div style={{ fontSize:5,color:'rgba(255,255,255,0.7)',marginBottom:4 }}>{d.ciudad}</div>}
-        {habs&&<><div style={{ fontSize:5.5,fontWeight:700,color:'rgba(255,255,255,0.8)',textTransform:'uppercase',marginBottom:2,marginTop:3 }}>Habilidades</div>{habs.split(',').slice(0,5).map(h=>h.trim()).filter(Boolean).map((h,i)=><div key={i} style={{ fontSize:5,color:'rgba(255,255,255,0.75)',marginBottom:1.5 }}>• {h}</div>)}</>}
+      <div style={{ width:'32%', background:bg, padding:'7px 5px', display:'flex', flexDirection:'column' }}>
+        <div style={{ fontSize:7,fontWeight:700,color:'#fff',lineHeight:1.2,marginBottom:2 }}>{d.nombre||'Nombre'}</div>
+        <div style={{ fontSize:5.5,color:'rgba(255,255,255,0.7)',marginBottom:4 }}>{d.cargo||''}</div>
+        <div style={{ borderTop:'0.5px solid rgba(255,255,255,0.2)',paddingTop:4,marginBottom:4 }}>
+          {d.telefono&&<div style={{ fontSize:5,color:'rgba(255,255,255,0.75)',marginBottom:1.5 }}>{d.telefono}</div>}
+          {d.email&&<div style={{ fontSize:4.5,color:'rgba(255,255,255,0.7)',marginBottom:1.5,wordBreak:'break-all' }}>{d.email}</div>}
+          {d.ciudad&&<div style={{ fontSize:5,color:'rgba(255,255,255,0.7)',marginBottom:3 }}>{d.ciudad}</div>}
+        </div>
+        {habsArr.length>0&&<>
+          <div style={{ fontSize:5.5,fontWeight:700,color:'rgba(255,255,255,0.8)',textTransform:'uppercase',marginBottom:3 }}>Habilidades</div>
+          {habsArr.map((h,i)=><div key={i} style={{ fontSize:5,color:'rgba(255,255,255,0.75)',marginBottom:1.5 }}>• {h}</div>)}
+        </>}
+        {d.idiomas&&<>
+          <div style={{ fontSize:5.5,fontWeight:700,color:'rgba(255,255,255,0.8)',textTransform:'uppercase',marginTop:5,marginBottom:2 }}>Idiomas</div>
+          <div style={{ fontSize:5,color:'rgba(255,255,255,0.75)' }}>{typeof d.idiomas==='string'?d.idiomas:(d.idiomas||[]).join(', ')}</div>
+        </>}
+        {(d.cursos||[]).filter(c=>c.nombre).slice(0,3).length>0&&<>
+          <div style={{ fontSize:5.5,fontWeight:700,color:'rgba(255,255,255,0.8)',textTransform:'uppercase',marginTop:5,marginBottom:2 }}>Cursos</div>
+          {(d.cursos||[]).filter(c=>c.nombre).slice(0,3).map((c,i)=><div key={i} style={{ fontSize:5,color:'rgba(255,255,255,0.75)',marginBottom:2 }}>{c.nombre}</div>)}
+        </>}
       </div>
       <div style={{ flex:1, padding:'7px 8px', overflow:'hidden' }}>
         <div style={{ fontSize:9,fontWeight:900,color:'#111',lineHeight:1.1,marginBottom:2 }}>{d.nombre||'NOMBRE'}</div>
         <div style={{ fontSize:6,fontWeight:700,color,marginBottom:5 }}>{d.cargo||'Cargo'}</div>
         {d.perfil&&<><div style={tS}>Perfil</div><p style={{ fontSize:5.5,color:'#444',lineHeight:1.4 }}>{d.perfil.slice(0,150)}</p></>}
         {d.experiencia?.[0]?.cargo&&<><div style={tS}>Experiencia</div>{d.experiencia.slice(0,2).map((e,i)=><div key={i} style={{ marginBottom:4 }}><div style={{ fontSize:6,fontWeight:700,color:'#111' }}>{e.cargo}</div><div style={{ fontSize:5.5,color:'#888' }}>{e.empresa} · {periodoStr(e)}</div></div>)}</>}
-        {d.educacion?.[0]?.titulo&&<><div style={tS}>Educación</div>{d.educacion.slice(0,1).map((e,i)=><div key={i}><div style={{ fontSize:6,fontWeight:700 }}>{e.titulo}</div><div style={{ fontSize:5.5,color:'#888' }}>{e.institucion}</div></div>)}</>}
+        {d.educacion?.[0]?.titulo&&<><div style={tS}>Educación</div>{d.educacion.slice(0,2).map((e,i)=><div key={i} style={{ marginBottom:3 }}><div style={{ fontSize:6,fontWeight:700 }}>{e.titulo}</div><div style={{ fontSize:5.5,color:'#888' }}>{e.institucion}</div></div>)}</>}
       </div>
     </div>
   )
@@ -312,7 +323,6 @@ function generarPDF(datos, pid, color, fuente) {
     if(dark){doc.setFillColor(43,43,43)}else{doc.setFillColor(pr,pg,pb)}
     doc.rect(0,0,aL,297,'F')
     let yL=10
-    if(d.fotoBase64){try{doc.addImage(d.fotoBase64,'JPEG',5,yL,aL-10,55);yL+=60}catch(e){yL+=10}}
     const tC = dark?[200,200,200]:[255,255,255]
     doc.setFontSize(11); doc.setFont(fn,'bold'); doc.setTextColor(...tC)
     doc.splitTextToSize(d.nombre||'NOMBRE',aL-8).forEach(l=>{doc.text(l,5,yL);yL+=6})
