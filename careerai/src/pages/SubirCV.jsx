@@ -82,6 +82,7 @@ REGLAS:
         if (!text) throw new Error('Respuesta vacía de Gemini')
         let clean = text.replace(/```json|```/g, '').trim()
         try {
+          console.log("JSON antes de parsear:", clean)   // 👈 Log clave
           resolve(JSON.parse(clean))
         } catch {
           // Reparar JSON cortado
@@ -92,6 +93,7 @@ REGLAS:
           }
           for (let i=0;i<arr;i++) clean+=']'
           for (let i=0;i<depth;i++) clean+='}'
+          console.log("JSON reparado antes de parsear:", clean)  // 👈 Log de respaldo
           resolve(JSON.parse(clean))
         }
       } catch(err) {
