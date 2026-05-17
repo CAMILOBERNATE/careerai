@@ -130,12 +130,7 @@ function P1({ d, color }) {
       {/* Header */}
       <div style={{ background:color, padding:'18px 22px', color:'#fff' }}>
         <div style={{ fontSize:20, fontWeight:900, letterSpacing:'-0.02em' }}>{d.nombre||'NOMBRE COMPLETO'}</div>
-        // #### Cambiar si quiere mostrar cargo 
-        {false && (
-          <div style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', marginTop:3, opacity:0.85 }}>
-            {d.cargo||'Cargo Profesional'}
-          </div>
-)} 
+        <div style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', marginTop:3, opacity:0.85 }}>{d.cargo||'Cargo Profesional'}</div>
         <div style={{ fontSize:8.5, marginTop:6, opacity:0.75, display:'flex', gap:14, flexWrap:'wrap' }}>
           {d.email&&<span>✉ {d.email}</span>}
           {d.telefono&&<span>📞 {d.telefono}</span>}
