@@ -93,6 +93,14 @@ REGLAS:
           }
           for (let i=0;i<arr;i++) clean+=']'
           for (let i=0;i<depth;i++) clean+='}'
+
+          // 🔧 Saneamiento adicional de cadenas
+          let safeClean = clean
+            .replace(/"\s*\n/g, '"\\n')   // evita cadenas abiertas por salto de línea
+            .replace(/\n/g, '\\n')        // escapa saltos de línea
+            .replace(/\r/g, '')           // elimina retornos de carro
+            .replace(/\t/g, ' ')          // reemplaza tabulaciones por espacio
+
           console.log("JSON reparado antes de parsear:", clean)  // 👈 Log de respaldo
         resolve(JSON.parse(clean))
         }
