@@ -94,7 +94,7 @@ REGLAS:
           for (let i=0;i<arr;i++) clean+=']'
           for (let i=0;i<depth;i++) clean+='}'
           console.log("JSON reparado antes de parsear:", clean)  // 👈 Log de respaldo
-          resolve(JSON.parse(clean))
+        resolve(JSON.parse(clean))
         }
       } catch(err) {
         console.error('Error completo:', err)
