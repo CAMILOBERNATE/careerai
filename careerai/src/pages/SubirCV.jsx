@@ -157,7 +157,6 @@ function P1({ d, color }) {
     <div style={{ width:'100%', minHeight:'100%', fontFamily:'Arial, sans-serif', background:'#fff', display:'flex', flexDirection:'column' }}>
       <div style={{ background:color, padding:'18px 22px', color:'#fff' }}>
         <div style={{ fontSize:20, fontWeight:900 }}>{d.nombre||'NOMBRE COMPLETO'}</div>
-        <div style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', marginTop:3, opacity:0.85 }}>{d.cargo||'Cargo'}</div>
         <div style={{ fontSize:8.5, marginTop:6, opacity:0.75, display:'flex', gap:14, flexWrap:'wrap' }}>
           {d.email&&<span>{d.email}</span>}
           {d.telefono&&<span>{d.telefono}</span>}
@@ -238,7 +237,6 @@ function P2({ d, color }) {
     <div style={{ width:'100%', minHeight:'100%', fontFamily:'Georgia, serif', background:'#fff', padding:'24px 32px' }}>
       <div style={{ textAlign:'center', marginBottom:16, borderBottom:`2px solid ${color}`, paddingBottom:12 }}>
         <div style={{ fontSize:22, fontWeight:900, color:'#111' }}>{d.nombre||'NOMBRE COMPLETO'}</div>
-        <div style={{ fontSize:11, color, fontWeight:600, marginTop:4, letterSpacing:'0.06em', textTransform:'uppercase' }}>{d.cargo||'Cargo'}</div>
         <div style={{ fontSize:9, color:'#777', marginTop:6, display:'flex', justifyContent:'center', gap:16, flexWrap:'wrap' }}>
           {d.email&&<span>{d.email}</span>}{d.telefono&&<span>{d.telefono}</span>}{d.ciudad&&<span>{d.ciudad}</span>}
         </div>
@@ -346,7 +344,6 @@ function P4({ d, color }) {
       <div style={{ flex:1, display:'flex', flexDirection:'column' }}>
         <div style={{ padding:'18px 24px 14px', borderBottom:`1px solid ${color}30` }}>
           <div style={{ fontSize:20, fontWeight:900, color:'#111' }}>{d.nombre||'NOMBRE COMPLETO'}</div>
-          <div style={{ fontSize:10, color, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.08em', marginTop:3 }}>{d.cargo||'Cargo'}</div>
           <div style={{ fontSize:8.5, color:'#888', marginTop:6, display:'flex', gap:16, flexWrap:'wrap' }}>
             {d.email&&<span>{d.email}</span>}{d.telefono&&<span>{d.telefono}</span>}{d.ciudad&&<span>{d.ciudad}</span>}
           </div>
@@ -400,7 +397,6 @@ function P5({ d, color }) {
     <div style={{ width:'100%', minHeight:'100%', fontFamily:'"Times New Roman", serif', background:'#fff', padding:'28px 36px' }}>
       <div style={{ marginBottom:16 }}>
         <div style={{ fontSize:24, fontWeight:900, color:'#000', letterSpacing:'-0.03em', lineHeight:1 }}>{d.nombre||'NOMBRE COMPLETO'}</div>
-        <div style={{ fontSize:11, color:'#555', fontStyle:'italic', marginTop:4 }}>{d.cargo||'Cargo'}</div>
         <div style={{ height:1, background:'#000', margin:'10px 0' }}/>
         <div style={{ fontSize:8.5, color:'#666', display:'flex', gap:18, flexWrap:'wrap' }}>
           {d.email&&<span>{d.email}</span>}{d.telefono&&<span>{d.telefono}</span>}{d.ciudad&&<span>{d.ciudad}</span>}
@@ -451,7 +447,6 @@ function P6({ d, color }) {
     <div style={{ width:'100%', minHeight:'100%', fontFamily:'Arial, sans-serif', background:'#fff' }}>
       <div style={{ background:'#f5f5f5', borderBottom:`3px solid ${color}`, padding:'20px 26px' }}>
         <div style={{ fontSize:21, fontWeight:900, color:'#111' }}>{d.nombre||'NOMBRE COMPLETO'}</div>
-        <div style={{ fontSize:10, color, fontWeight:700, textTransform:'uppercase', letterSpacing:'0.1em', marginTop:3 }}>{d.cargo||'Cargo'}</div>
         <div style={{ fontSize:8.5, color:'#666', marginTop:8, display:'flex', gap:16, flexWrap:'wrap' }}>
           {d.email&&<span>{d.email}</span>}{d.telefono&&<span>{d.telefono}</span>}{d.ciudad&&<span>{d.ciudad}</span>}
         </div>
@@ -492,7 +487,6 @@ function P7({ d, color }) {
     <div style={{ width:'100%', minHeight:'100%', fontFamily:'Arial, sans-serif', background:bg }}>
       <div style={{ background:color, padding:'20px 28px', textAlign:'center' }}>
         <div style={{ fontSize:22, fontWeight:900, color:'#fff' }}>{d.nombre||'NOMBRE COMPLETO'}</div>
-        <div style={{ fontSize:10, color:'rgba(255,255,255,0.8)', textTransform:'uppercase', letterSpacing:'0.1em', marginTop:4 }}>{d.cargo||'Cargo'}</div>
         <div style={{ fontSize:8.5, color:'rgba(255,255,255,0.65)', marginTop:8, display:'flex', justifyContent:'center', gap:16, flexWrap:'wrap' }}>
           {d.email&&<span>{d.email}</span>}{d.telefono&&<span>{d.telefono}</span>}{d.ciudad&&<span>{d.ciudad}</span>}
         </div>
