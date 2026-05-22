@@ -2,6 +2,11 @@ import { useState, useRef } from 'react'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import * as pdfjsLib from 'pdfjs-dist'
+import { pdfjs } from "react-pdf";
+import pdfWorker from "pdfjs-dist/build/pdf.worker.min.js";
+
+pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
+
 
 // Configurar worker de pdfjs
 pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.js`
