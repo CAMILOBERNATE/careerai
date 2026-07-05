@@ -1,14 +1,12 @@
 import { NavLink } from 'react-router-dom'
 
 const NAV = [
-  { to: '/inicio',      icon: '🏠', label: 'Inicio' },
-  { to: '/crear-cv',    icon: '📝', label: 'Crear CV' },
-  { to: '/subir-cv',    icon: '📤', label: 'Subir CV (ATS)' },
-  { to: '/entrevista',  icon: '🎯', label: 'Simular Entrevista' },
-  { to: '/chat',        icon: '💬', label: 'Chat Laboral' },
-  { to: '/tips',        icon: '💡', label: 'Tips y Consejos' },
-  { to: '/plantillas',  icon: '🎨', label: 'Plantillas' },
-  { to: '/admin',       icon: '🔐', label: 'Admin Plantillas' },
+  { to: '/inicio',     icon: '🏠', label: 'Inicio' },
+  { to: '/crear-cv',   icon: '📝', label: 'Crear CV' },
+  { to: '/subir-cv',   icon: '📤', label: 'Subir CV (ATS)' },
+  { to: '/entrevista', icon: '🎯', label: 'Simular Entrevista' },
+  { to: '/chat',       icon: '💬', label: 'Chat Laboral' },
+  { to: '/tips',       icon: '💡', label: 'Tips y Consejos' },
 ]
 
 const HUELLAS = ['🐾','🐾','🐾','🐾','🐾','🐾']
@@ -25,7 +23,7 @@ export default function Sidebar() {
       top: 0,
       height: '100vh',
     }}>
-      {/* Sección del perrito Ruti */}
+      {/* Rutti */}
       <div style={{
         padding: '28px 20px 20px',
         borderBottom: '1px solid rgba(255,255,255,0.1)',
@@ -43,7 +41,7 @@ export default function Sidebar() {
           🐶
         </div>
         <div style={{ fontWeight: 800, fontSize: 18, color: 'var(--blanco)', letterSpacing: 0.5 }}>
-          Ruti
+          Rutti
         </div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginBottom: 12 }}>
           Tu guía laboral 🌟
@@ -55,9 +53,7 @@ export default function Sidebar() {
               opacity: 0.3 + (i * 0.1),
               transform: `rotate(${i % 2 === 0 ? '-15deg' : '15deg'})`,
               display: 'inline-block',
-            }}>
-              {h}
-            </span>
+            }}>{h}</span>
           ))}
         </div>
       </div>
