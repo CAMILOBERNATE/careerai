@@ -3,7 +3,6 @@ import { mejorarTexto } from '../lib/gemini.js'
 import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 
-// ─── CONSTANTES ───────────────────────────────────────────────────────────────
 const MESES_NOMBRES = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic']
 const MESES = ['01','02','03','04','05','06','07','08','09','10','11','12']
 const ANIOS = Array.from({ length: 30 }, (_, i) => String(new Date().getFullYear() - i))
@@ -16,14 +15,20 @@ const per = e => {
 
 const habs6 = h => {
   if (!h) return []
-  if (Array.isArray(h)) return h.slice(0, 8)
+  if (Array.isArray(h)) return h.filter(Boolean).slice(0, 8)
   return h.split(',').map(x => x.trim()).filter(Boolean).slice(0, 8)
 }
 
+const idiomasStr = ids => {
+  if (!ids) return ''
+  if (Array.isArray(ids)) return ids.filter(i => i.idioma).map(i => `${i.idioma}${i.nivel ? ' (' + i.nivel + ')' : ''}`).join(', ')
+  return ids
+}
+
 const FUENTES = [
-  { id: 'arial',    nombre: 'Moderna',  css: 'Arial, sans-serif' },
-  { id: 'georgia',  nombre: 'Elegante', css: 'Georgia, serif' },
-  { id: 'courier',  nombre: 'Técnica',  css: '"Courier New", monospace' },
+  { id: 'arial',   nombre: 'Moderna',  css: 'Arial, sans-serif' },
+  { id: 'georgia', nombre: 'Elegante', css: 'Georgia, serif' },
+  { id: 'courier', nombre: 'Técnica',  css: '"Courier New", monospace' },
 ]
 
 const COLORES = [
@@ -37,7 +42,8 @@ const INICIAL = {
   experiencia:[{ cargo:'',empresa:'',ciudad:'',mesInicio:'',anioInicio:'',mesFin:'',anioFin:'',actual:false,funciones:'',logros:'' }],
   educacion:[{ titulo:'',institucion:'',ciudad:'',mesInicio:'',anioInicio:'',mesFin:'',anioFin:'',actual:false }],
   cursos:[{ nombre:'',institucion:'',anio:'' }],
-  habilidades:'', idiomas:'',
+  habilidades:[],
+  idiomas:[{ idioma:'', nivel:'Nativo' }],
 }
 
 // ─── HELPERS UI ───────────────────────────────────────────────────────────────
@@ -48,11 +54,10 @@ function MinTitle({ children }) {
   return <div style={{ fontSize:8, fontWeight:700, color:'#000', textTransform:'uppercase', letterSpacing:'0.12em', borderBottom:'1px solid #000', paddingBottom:2, marginBottom:6, marginTop:10 }}>{children}</div>
 }
 
-// ─── PLANTILLAS ───────────────────────────────────────────────────────────────
-
-// P1 — FORMAL: 2 col, encabezado color, sidebar barras — SIN FOTO
+// ─── P1 FORMAL — sin foto ─────────────────────────────────────────────────────
 function P1({ d, color, ff }) {
   const habs = habs6(d.habilidades)
+  const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   return (
     <div style={{ width:'100%', minHeight:'100%', fontFamily:ff, background:'#fff', display:'flex', flexDirection:'column' }}>
@@ -115,7 +120,7 @@ function P1({ d, color, ff }) {
               ))}
             </div>
           )}
-          {d.idiomas&&<div style={{ marginBottom:12 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:8.5, color:'#333' }}>{d.idiomas}</div></div>}
+          {idStr&&<div style={{ marginBottom:12 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:8.5, color:'#333' }}>{idStr}</div></div>}
           {cursos.length>0&&(
             <div>
               <STitle color={color}>Cursos</STitle>
@@ -134,9 +139,10 @@ function P1({ d, color, ff }) {
   )
 }
 
-// P2 — PROFESIONAL: 1 col centrada, chips habilidades — CON FOTO
+// ─── P2 PROFESIONAL — con foto ────────────────────────────────────────────────
 function P2({ d, color, ff }) {
   const habs = habs6(d.habilidades)
+  const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   return (
     <div style={{ width:'100%', minHeight:'100%', fontFamily:ff, background:'#fff', padding:'24px 32px' }}>
@@ -151,7 +157,6 @@ function P2({ d, color, ff }) {
             {d.linkedin&&<span>{d.linkedin}</span>}
           </div>
         </div>
-        {/* FOTO */}
         <div style={{ width:70, height:80, borderRadius:4, overflow:'hidden', border:`2px solid ${color}`, flexShrink:0, marginLeft:16 }}>
           {d.fotoBase64
             ? <img src={d.fotoBase64} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
@@ -186,21 +191,21 @@ function P2({ d, color, ff }) {
         </div>
       )}
       <div style={{ display:'flex', gap:24 }}>
-        {d.idiomas&&<div style={{ flex:1 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:9.5, color:'#444' }}>{d.idiomas}</div></div>}
+        {idStr&&<div style={{ flex:1 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:9.5, color:'#444' }}>{idStr}</div></div>}
         {cursos.length>0&&<div style={{ flex:2 }}><STitle color={color}>Cursos</STitle>{cursos.map((c,i)=><div key={i} style={{ fontSize:9, color:'#555', marginBottom:4 }}><strong>{c.nombre}</strong>{c.institucion&&` — ${c.institucion}`}{c.anio&&` (${c.anio})`}</div>)}</div>}
       </div>
     </div>
   )
 }
 
-// P3 — CREATIVA: sidebar oscuro izquierda — CON FOTO
+// ─── P3 CREATIVA — con foto ───────────────────────────────────────────────────
 function P3({ d, color, ff }) {
   const habs = habs6(d.habilidades)
+  const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   return (
     <div style={{ width:'100%', minHeight:'100%', fontFamily:ff, background:'#fff', display:'flex' }}>
       <div style={{ width:'34%', background:'#1e1e2e', padding:'22px 14px', display:'flex', flexDirection:'column', gap:10 }}>
-        {/* FOTO */}
         <div style={{ width:80, height:80, borderRadius:'50%', overflow:'hidden', margin:'0 auto 8px', border:`3px solid ${color}`, flexShrink:0 }}>
           {d.fotoBase64
             ? <img src={d.fotoBase64} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
@@ -229,7 +234,7 @@ function P3({ d, color, ff }) {
             ))}
           </div>
         )}
-        {d.idiomas&&<div style={{ borderTop:'0.5px solid rgba(255,255,255,0.15)', paddingTop:10 }}><div style={{ fontSize:8, fontWeight:700, color, textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>Idiomas</div><div style={{ fontSize:7.5, color:'rgba(255,255,255,0.75)' }}>{d.idiomas}</div></div>}
+        {idStr&&<div style={{ borderTop:'0.5px solid rgba(255,255,255,0.15)', paddingTop:10 }}><div style={{ fontSize:8, fontWeight:700, color, textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:5 }}>Idiomas</div><div style={{ fontSize:7.5, color:'rgba(255,255,255,0.75)' }}>{idStr}</div></div>}
         {cursos.length>0&&(
           <div style={{ borderTop:'0.5px solid rgba(255,255,255,0.15)', paddingTop:10 }}>
             <div style={{ fontSize:8, fontWeight:700, color, textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>Cursos</div>
@@ -264,9 +269,10 @@ function P3({ d, color, ff }) {
   )
 }
 
-// P4 — CORPORATIVA: barra lateral color, etiquetas sólidas — SIN FOTO
+// ─── P4 CORPORATIVA — sin foto ────────────────────────────────────────────────
 function P4({ d, color, ff }) {
   const habs = habs6(d.habilidades)
+  const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   return (
     <div style={{ width:'100%', minHeight:'100%', fontFamily:ff, background:'#fff', display:'flex' }}>
@@ -312,7 +318,7 @@ function P4({ d, color, ff }) {
               </div>
             )}
             <div style={{ flex:1 }}>
-              {d.idiomas&&<div style={{ marginBottom:12 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:9.5, color:'#444' }}>{d.idiomas}</div></div>}
+              {idStr&&<div style={{ marginBottom:12 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:9.5, color:'#444' }}>{idStr}</div></div>}
               {cursos.length>0&&<div><STitle color={color}>Cursos</STitle>{cursos.map((c,i)=><div key={i} style={{ fontSize:8.5, color:'#555', marginBottom:4 }}><strong>{c.nombre}</strong>{c.anio&&` (${c.anio})`}</div>)}</div>}
             </div>
           </div>
@@ -322,9 +328,10 @@ function P4({ d, color, ff }) {
   )
 }
 
-// P5 — MINIMALISTA: serif, negro, líneas finas — SIN FOTO
+// ─── P5 MINIMALISTA — sin foto ────────────────────────────────────────────────
 function P5({ d, color, ff }) {
   const habs = habs6(d.habilidades)
+  const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   return (
     <div style={{ width:'100%', minHeight:'100%', fontFamily:ff||'"Times New Roman", serif', background:'#fff', padding:'28px 36px' }}>
@@ -367,7 +374,7 @@ function P5({ d, color, ff }) {
       <div style={{ display:'flex', gap:24 }}>
         {habs.length>0&&<div style={{ flex:1 }}><MinTitle>Habilidades</MinTitle><div style={{ display:'flex', flexWrap:'wrap', gap:4 }}>{habs.map((h,i)=><span key={i} style={{ fontSize:8.5, color:'#333', padding:'2px 8px', border:'1px solid #333', borderRadius:2 }}>{h}</span>)}</div></div>}
         <div style={{ flex:1 }}>
-          {d.idiomas&&<div style={{ marginBottom:8 }}><MinTitle>Idiomas</MinTitle><div style={{ fontSize:9.5, color:'#444' }}>{d.idiomas}</div></div>}
+          {idStr&&<div style={{ marginBottom:8 }}><MinTitle>Idiomas</MinTitle><div style={{ fontSize:9.5, color:'#444' }}>{idStr}</div></div>}
           {cursos.length>0&&<div><MinTitle>Cursos</MinTitle>{cursos.map((c,i)=><div key={i} style={{ fontSize:9, color:'#444', marginBottom:3 }}>{c.nombre}{c.anio&&` (${c.anio})`}</div>)}</div>}
         </div>
       </div>
@@ -375,14 +382,14 @@ function P5({ d, color, ff }) {
   )
 }
 
-// P6 — EJECUTIVA: header gris, 2 col simétricas — CON FOTO
+// ─── P6 EJECUTIVA — con foto ──────────────────────────────────────────────────
 function P6({ d, color, ff }) {
   const habs = habs6(d.habilidades)
+  const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   return (
     <div style={{ width:'100%', minHeight:'100%', fontFamily:ff, background:'#fff' }}>
       <div style={{ background:'#f5f5f5', borderBottom:`3px solid ${color}`, padding:'20px 26px', display:'flex', gap:16, alignItems:'center' }}>
-        {/* FOTO */}
         <div style={{ width:72, height:80, borderRadius:4, overflow:'hidden', border:`2px solid ${color}`, flexShrink:0 }}>
           {d.fotoBase64
             ? <img src={d.fotoBase64} style={{ width:'100%', height:'100%', objectFit:'cover' }}/>
@@ -418,7 +425,7 @@ function P6({ d, color, ff }) {
         <div style={{ flex:1 }}>
           {habs.length>0&&<div style={{ marginBottom:14 }}><STitle color={color}>Habilidades</STitle>{habs.map((h,i)=><div key={i} style={{ display:'flex', alignItems:'center', gap:8, marginBottom:5 }}><div style={{ width:6, height:6, borderRadius:'50%', background:color, flexShrink:0 }}/><div style={{ fontSize:9, color:'#333' }}>{h}</div></div>)}</div>}
           {(d.educacion||[]).filter(e=>e.titulo).length>0&&<div style={{ marginBottom:14 }}><STitle color={color}>Formación Académica</STitle>{(d.educacion||[]).filter(e=>e.titulo).map((e,i)=><div key={i} style={{ marginBottom:8 }}><div style={{ fontSize:10, fontWeight:700, color:'#111' }}>{e.titulo}</div><div style={{ fontSize:8.5, color:'#666' }}>{e.institucion}</div><div style={{ fontSize:8, color:'#bbb' }}>{per(e)}</div></div>)}</div>}
-          {d.idiomas&&<div style={{ marginBottom:12 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:9.5, color:'#444' }}>{d.idiomas}</div></div>}
+          {idStr&&<div style={{ marginBottom:12 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:9.5, color:'#444' }}>{idStr}</div></div>}
           {cursos.length>0&&<div><STitle color={color}>Cursos</STitle>{cursos.map((c,i)=><div key={i} style={{ fontSize:9, color:'#555', marginBottom:4 }}><strong>{c.nombre}</strong>{c.anio&&` (${c.anio})`}</div>)}</div>}
         </div>
       </div>
@@ -426,9 +433,10 @@ function P6({ d, color, ff }) {
   )
 }
 
-// P7 — PREMIUM: header color, fondo suave, cards — SIN FOTO
+// ─── P7 PREMIUM — sin foto ────────────────────────────────────────────────────
 function P7({ d, color, ff }) {
   const habs = habs6(d.habilidades)
+  const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   const bg = color + '10'
   return (
@@ -466,7 +474,7 @@ function P7({ d, color, ff }) {
         <div style={{ display:'flex', gap:24 }}>
           {(d.educacion||[]).filter(e=>e.titulo).length>0&&<div style={{ flex:1 }}><STitle color={color}>Formación Académica</STitle>{(d.educacion||[]).filter(e=>e.titulo).map((e,i)=><div key={i} style={{ marginBottom:8 }}><div style={{ fontSize:10, fontWeight:700, color:'#111' }}>{e.titulo}</div><div style={{ fontSize:8.5, color:'#666' }}>{e.institucion}</div><div style={{ fontSize:8, color:'#bbb' }}>{per(e)}</div></div>)}</div>}
           <div style={{ flex:1 }}>
-            {d.idiomas&&<div style={{ marginBottom:10 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:9.5, color:'#444' }}>{d.idiomas}</div></div>}
+            {idStr&&<div style={{ marginBottom:10 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:9.5, color:'#444' }}>{idStr}</div></div>}
             {cursos.length>0&&<div><STitle color={color}>Cursos</STitle>{cursos.map((c,i)=><div key={i} style={{ fontSize:9, color:'#555', marginBottom:4 }}><strong>{c.nombre}</strong>{c.anio&&` (${c.anio})`}</div>)}</div>}
           </div>
         </div>
@@ -527,6 +535,8 @@ export default function CrearCV() {
   const actExp = (i,k,v) => { const e=[...datos.experiencia]; e[i][k]=v; setDatos(d=>({...d,experiencia:e})) }
   const actEdu = (i,k,v) => { const e=[...datos.educacion]; e[i][k]=v; setDatos(d=>({...d,educacion:e})) }
   const actCur = (i,k,v) => { const c=[...datos.cursos]; c[i][k]=v; setDatos(d=>({...d,cursos:c})) }
+  const actHab = (i,v) => { const h=[...(datos.habilidades||[])]; h[i]=v; act('habilidades',h) }
+  const actId  = (i,k,v) => { const ids=[...(datos.idiomas||[])]; ids[i]={...ids[i],[k]:v}; act('idiomas',ids) }
 
   const mejorar = async (campo, texto, tipo) => {
     if(!texto.trim()) return
@@ -575,6 +585,8 @@ export default function CrearCV() {
     </div>
   )
 
+  const DEMO = { nombre:'Laura García', cargo:'Diseñadora UX', email:'laura@email.com', telefono:'300 000 0000', ciudad:'Bogotá', direccion:'', linkedin:'linkedin.com/in/laura', perfil:'Profesional con experiencia en diseño digital.', fotoBase64:'', experiencia:[{ cargo:'Diseñadora Sr', empresa:'Empresa XYZ', ciudad:'Bogotá', mesInicio:'03', anioInicio:'2021', mesFin:'', anioFin:'', actual:true, funciones:'Diseño de interfaces\nPrototipos', logros:'' }], educacion:[{ titulo:'Diseño Gráfico', institucion:'Univ. Nacional', ciudad:'', mesInicio:'', anioInicio:'2016', mesFin:'', anioFin:'2020', actual:false }], cursos:[{ nombre:'UX Research', institucion:'Google', anio:'2022' }], habilidades:['Figma','Photoshop','UX','Liderazgo'], idiomas:[{ idioma:'Español', nivel:'Nativo' },{ idioma:'Inglés', nivel:'B2' }] }
+
   // ── SELECTOR ─────────────────────────────────────────────────────────────
   if (paso === 'selector') return (
     <div style={{ height:'100vh', display:'flex', flexDirection:'column' }}>
@@ -583,8 +595,6 @@ export default function CrearCV() {
         <p style={{ fontSize:12, color:'var(--texto2)', marginTop:2 }}>Elige una plantilla y personaliza el estilo</p>
       </div>
       <div style={{ flex:1, overflowY:'auto', padding:'20px 24px' }}>
-
-        {/* Plantillas */}
         <div style={{ fontSize:12, fontWeight:700, color:'var(--texto)', marginBottom:10 }}>Plantilla</div>
         <div style={{ display:'grid', gridTemplateColumns:'repeat(4,1fr)', gap:10, marginBottom:20 }}>
           {PLANTILLAS.map(p=>{
@@ -594,7 +604,7 @@ export default function CrearCV() {
                 style={{ border:`2px solid ${config.plantillaId===p.id?'var(--azul)':'var(--gris2)'}`, borderRadius:10, overflow:'hidden', cursor:'pointer', transition:'all 0.15s', transform:config.plantillaId===p.id?'translateY(-2px)':'none', boxShadow:config.plantillaId===p.id?'0 4px 16px rgba(0,61,165,0.15)':'none' }}>
                 <div style={{ height:90, overflow:'hidden', background:'#f5f5f5', position:'relative' }}>
                   <div style={{ transform:'scale(0.24)', transformOrigin:'top left', width:'417%', height:'417%', pointerEvents:'none' }}>
-                    <PComp d={{ nombre:'Laura García', cargo:'Diseñadora UX', email:'laura@email.com', telefono:'300 000 0000', ciudad:'Bogotá', direccion:'', linkedin:'linkedin.com/in/laura', perfil:'Profesional con experiencia en diseño digital.', fotoBase64:'', experiencia:[{ cargo:'Diseñadora Sr', empresa:'Empresa XYZ', ciudad:'Bogotá', mesInicio:'03', anioInicio:'2021', mesFin:'', anioFin:'', actual:true, funciones:'Diseño de interfaces\nPrototipos', logros:'' }], educacion:[{ titulo:'Diseño Gráfico', institucion:'Univ. Nacional', ciudad:'', mesInicio:'', anioInicio:'2016', mesFin:'', anioFin:'2020', actual:false }], cursos:[{ nombre:'UX Research', institucion:'Google', anio:'2022' }], habilidades:'Figma, Photoshop, UX, Liderazgo', idiomas:'Español nativo' }} color={p.color} ff="Arial, sans-serif"/>
+                    <PComp d={DEMO} color={p.color} ff="Arial, sans-serif"/>
                   </div>
                 </div>
                 <div style={{ padding:'7px 9px', background:config.plantillaId===p.id?'rgba(0,61,165,0.04)':'var(--blanco)' }}>
@@ -606,9 +616,7 @@ export default function CrearCV() {
           })}
         </div>
 
-        {/* Color + Fuente + Preview */}
         <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr 1fr', gap:12, marginBottom:20 }}>
-          {/* Color */}
           <div style={card}>
             <div style={{ fontSize:11, fontWeight:700, color:'var(--texto)', marginBottom:8 }}>Color principal</div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(6,1fr)', gap:5, marginBottom:8 }}>
@@ -616,19 +624,15 @@ export default function CrearCV() {
             </div>
             <input type="color" value={config.color} onChange={e=>actCfg('color',e.target.value)} style={{ width:'100%', height:28, border:'none', borderRadius:6, cursor:'pointer', padding:2 }}/>
           </div>
-
-          {/* Fuente */}
           <div style={card}>
             <div style={{ fontSize:11, fontWeight:700, color:'var(--texto)', marginBottom:8 }}>Tipo de letra</div>
             {FUENTES.map(f=><div key={f.id} onClick={()=>actCfg('fuente',f.id)} style={{ padding:'6px 8px', marginBottom:5, borderRadius:7, border:`1.5px solid ${config.fuente===f.id?'var(--azul)':'var(--gris2)'}`, background:config.fuente===f.id?'rgba(0,61,165,0.05)':'var(--gris)', cursor:'pointer', transition:'all 0.15s' }}><div style={{ fontFamily:f.css, fontSize:12, fontWeight:600, color:config.fuente===f.id?'var(--azul)':'var(--texto)' }}>{f.nombre}</div><div style={{ fontFamily:f.css, fontSize:10, color:'var(--texto2)' }}>Aa Bb 123</div></div>)}
           </div>
-
-          {/* Mini preview */}
           <div style={card}>
             <div style={{ fontSize:11, fontWeight:700, color:'var(--texto)', marginBottom:8 }}>Vista previa</div>
             <div style={{ background:'#f0f0f0', borderRadius:6, overflow:'hidden', border:'1px solid var(--gris2)', height:140 }}>
               <div style={{ transform:'scale(0.28)', transformOrigin:'top left', width:'357%', height:'357%', pointerEvents:'none' }}>
-                <Comp d={{ nombre:'Laura García', cargo:'Diseñadora UX', email:'laura@email.com', telefono:'300 000 0000', ciudad:'Bogotá', direccion:'', linkedin:'', perfil:'Profesional con experiencia en diseño.', fotoBase64:'', experiencia:[{ cargo:'Diseñadora Sr', empresa:'Empresa XYZ', ciudad:'Bogotá', mesInicio:'03', anioInicio:'2021', mesFin:'', anioFin:'', actual:true, funciones:'Diseño de interfaces\nPrototipos', logros:'' }], educacion:[{ titulo:'Diseño Gráfico', institucion:'Univ. Nacional', ciudad:'', mesInicio:'', anioInicio:'2016', mesFin:'', anioFin:'2020', actual:false }], cursos:[{ nombre:'UX Research', institucion:'Google', anio:'2022' }], habilidades:'Figma, Photoshop, UX, Liderazgo', idiomas:'Español nativo' }} color={config.color} ff={ff}/>
+                <Comp d={DEMO} color={config.color} ff={ff}/>
               </div>
             </div>
           </div>
@@ -646,7 +650,6 @@ export default function CrearCV() {
   // ── EDITOR ────────────────────────────────────────────────────────────────
   return (
     <div style={{ height:'100vh', display:'flex', flexDirection:'column' }}>
-      {/* Header compacto */}
       <div style={{ borderBottom:'1px solid var(--gris2)', background:'var(--blanco)', flexShrink:0 }}>
         <div style={{ padding:'8px 16px', display:'flex', alignItems:'center', justifyContent:'space-between' }}>
           <div style={{ display:'flex', alignItems:'center', gap:8 }}>
@@ -655,7 +658,6 @@ export default function CrearCV() {
             <span style={{ fontSize:11, color:'var(--texto2)' }}>{plt.conFoto?'· Con foto':'· Sin foto'}</span>
           </div>
           <div style={{ display:'flex', gap:6, alignItems:'center' }}>
-            {/* Color rápido */}
             {COLORES.slice(0,6).map(c=><div key={c} onClick={()=>actCfg('color',c)} style={{ width:18, height:18, borderRadius:'50%', background:c, cursor:'pointer', border:config.color===c?'2px solid white':'1px solid transparent', boxShadow:config.color===c?`0 0 0 1.5px ${c}`:'none', flexShrink:0 }}/>)}
             <input type="color" value={config.color} onChange={e=>actCfg('color',e.target.value)} style={{ width:22, height:22, border:'1px solid var(--gris2)', borderRadius:4, cursor:'pointer', padding:1 }}/>
             <div style={{ width:1, height:18, background:'var(--gris2)', margin:'0 2px' }}/>
@@ -670,7 +672,6 @@ export default function CrearCV() {
       </div>
 
       <div style={{ flex:1, display:'grid', gridTemplateColumns:'380px 1fr', overflow:'hidden' }}>
-        {/* FORMULARIO */}
         <div style={{ overflowY:'auto', borderRight:'1px solid var(--gris2)', padding:'12px 14px', background:'var(--gris)' }}>
 
           {/* Datos personales */}
@@ -681,7 +682,6 @@ export default function CrearCV() {
                 <div key={k}><label style={lbl}>{l}</label><input value={datos[k]} onChange={e=>act(k,e.target.value)} placeholder={l} style={inp}/></div>
               ))}
             </div>
-            {/* Foto solo si la plantilla la tiene */}
             {plt.conFoto && (
               <div style={{ marginTop:10 }}>
                 <label style={lbl}>Foto de perfil</label>
@@ -782,13 +782,46 @@ export default function CrearCV() {
             ))}
           </div>
 
-          {/* Habilidades e Idiomas */}
+          {/* Habilidades */}
           <div style={card}>
-            <div style={{ fontSize:12, fontWeight:700, color:'var(--azul)', marginBottom:10 }}>Habilidades e Idiomas</div>
-            <div style={{ display:'flex', flexDirection:'column', gap:10 }}>
-              <div><label style={lbl}>Habilidades (separadas por comas, máx 8)</label><input value={datos.habilidades} onChange={e=>act('habilidades',e.target.value)} placeholder="Excel, Word, Liderazgo..." style={inp}/></div>
-              <div><label style={lbl}>Idiomas</label><input value={datos.idiomas} onChange={e=>act('idiomas',e.target.value)} placeholder="Español nativo, Inglés B2..." style={inp}/></div>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
+              <div style={{ fontSize:12, fontWeight:700, color:'var(--azul)' }}>Habilidades</div>
+              <button onClick={()=>act('habilidades',[...(datos.habilidades||[]),''])} style={{ padding:'4px 8px', background:'rgba(0,61,165,0.1)', border:'1px solid rgba(0,61,165,0.3)', borderRadius:6, color:'var(--azul)', fontSize:11, fontWeight:700, cursor:'pointer' }}>+ Añadir</button>
             </div>
+            {(datos.habilidades||[]).map((h,i)=>(
+              <div key={i} style={{ display:'flex', gap:6, marginBottom:6, alignItems:'center' }}>
+                <input value={h} onChange={e=>actHab(i,e.target.value)} placeholder={`Habilidad ${i+1}`} style={{...inp,marginBottom:0}}/>
+                <button onClick={()=>act('habilidades',(datos.habilidades||[]).filter((_,j)=>j!==i))} style={{ padding:'6px 10px', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:6, color:'#ef4444', fontSize:13, cursor:'pointer', flexShrink:0 }}>×</button>
+              </div>
+            ))}
+            {(!datos.habilidades||datos.habilidades.length===0)&&<div style={{ fontSize:11, color:'var(--texto2)', textAlign:'center', padding:'8px 0' }}>Presiona "+ Añadir" para agregar habilidades</div>}
+          </div>
+
+          {/* Idiomas */}
+          <div style={card}>
+            <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
+              <div style={{ fontSize:12, fontWeight:700, color:'var(--azul)' }}>Idiomas</div>
+              <button onClick={()=>act('idiomas',[...(datos.idiomas||[]),{ idioma:'', nivel:'Básico' }])} style={{ padding:'4px 8px', background:'rgba(0,61,165,0.1)', border:'1px solid rgba(0,61,165,0.3)', borderRadius:6, color:'var(--azul)', fontSize:11, fontWeight:700, cursor:'pointer' }}>+ Añadir</button>
+            </div>
+            {(datos.idiomas||[]).map((id,i)=>(
+              <div key={i} style={{ display:'flex', gap:6, marginBottom:8, alignItems:'center' }}>
+                <input value={id.idioma} onChange={e=>actId(i,'idioma',e.target.value)} placeholder="Idioma" style={{...inp,marginBottom:0,flex:2}}/>
+                <select value={id.nivel} onChange={e=>actId(i,'nivel',e.target.value)} style={{...sel,marginBottom:0,flex:1,padding:'7px 6px',fontSize:12}}>
+                  <option value="Nativo">Nativo</option>
+                  <option value="Avanzado">Avanzado</option>
+                  <option value="Intermedio">Intermedio</option>
+                  <option value="Básico">Básico</option>
+                  <option value="B2">B2</option>
+                  <option value="B1">B1</option>
+                  <option value="A2">A2</option>
+                  <option value="A1">A1</option>
+                  <option value="C1">C1</option>
+                  <option value="C2">C2</option>
+                </select>
+                <button onClick={()=>act('idiomas',(datos.idiomas||[]).filter((_,j)=>j!==i))} style={{ padding:'6px 10px', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:6, color:'#ef4444', fontSize:13, cursor:'pointer', flexShrink:0 }}>×</button>
+              </div>
+            ))}
+            {(!datos.idiomas||datos.idiomas.length===0)&&<div style={{ fontSize:11, color:'var(--texto2)', textAlign:'center', padding:'8px 0' }}>Presiona "+ Añadir" para agregar idiomas</div>}
           </div>
 
           <div style={{ paddingBottom:20 }}>
