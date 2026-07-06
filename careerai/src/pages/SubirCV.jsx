@@ -3,8 +3,7 @@ import html2canvas from 'html2canvas'
 import { jsPDF } from 'jspdf'
 import * as pdfjsLib from 'pdfjs-dist'
 
-
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorker;
+  
 
 
 // Configurar worker de pdfjs
