@@ -603,7 +603,7 @@ export default function CrearCV() {
               <div key={p.id} onClick={()=>{ actCfg('plantillaId',p.id); actCfg('color',p.color) }}
                 style={{ border:`2px solid ${config.plantillaId===p.id?'var(--azul)':'var(--gris2)'}`, borderRadius:10, overflow:'hidden', cursor:'pointer', transition:'all 0.15s', transform:config.plantillaId===p.id?'translateY(-2px)':'none', boxShadow:config.plantillaId===p.id?'0 4px 16px rgba(0,61,165,0.15)':'none' }}>
                 <div style={{ aspectRatio:'794/1123', overflow:'hidden', background:'#fff', position:'relative' }}>
-                  <div style={{ position:'absolute', top:0, left:0, width:794, height:1123, transform:'scale(0.42)', transformOrigin:'top left', pointerEvents:'none' }}>
+                  <div style={{ position:'absolute', top:0, left:0, width:794, height:1123, transform:'scale(0.36)', transformOrigin:'top left', pointerEvents:'none' }}>
                     <PComp d={DEMO} color={p.color} ff="Arial, sans-serif"/>
                   </div>
                 </div>
