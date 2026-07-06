@@ -16,15 +16,16 @@ const per = e => {
 const habs6 = h => {
   if (!h) return []
   if (Array.isArray(h)) {
-    // Nuevo formato: [{nombre, nivel}]
     if (h.length > 0 && typeof h[0] === 'object' && h[0].nombre !== undefined) {
       return h.filter(x=>x.nombre).slice(0, 8)
     }
-    // Formato viejo: ['string']
-    return h.filter(Boolean).slice(0, 8).map(x => ({ nombre: x, nivel: 'Bueno' }))
+    return h.filter(Boolean).slice(0, 8).map(x => typeof x === 'string' ? { nombre:x, nivel:'Bueno' } : x)
   }
-  return h.split(',').map(x => ({ nombre: x.trim(), nivel: 'Bueno' })).filter(x=>x.nombre).slice(0, 8)
+  return h.split(',').map(x => ({ nombre:x.trim(), nivel:'Bueno' })).filter(x=>x.nombre).slice(0, 8)
 }
+
+// Para plantillas sin nivel — solo devuelve strings
+const habsStr6 = h => habs6(h).map(x => typeof x === 'object' ? x.nombre : x)
 
 const cap = str => {
   if (!str) return ''
@@ -149,19 +150,20 @@ function P1({ d, color, ff, fs=1 }) {
   )
 }
 
-function P2({ d, color, ff }) {
-  const habs = habs6(d.habilidades)
+function P2({ d, color, ff, fs=1 }) {
+  const habs = habsStr6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   return (
     <div style={{ width:'100%', minHeight:'100%', fontFamily:ff, background:'#fff', padding:'24px 32px' }}>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:16, borderBottom:`2px solid ${color}`, paddingBottom:12 }}>
         <div style={{ flex:1 }}>
-          <div style={{ fontSize:22, fontWeight:900, color:'#111' }}>{d.nombre||'NOMBRE COMPLETO'}</div>
-          <div style={{ fontSize:11, color, fontWeight:600, marginTop:4, letterSpacing:'0.06em', textTransform:'uppercase' }}>{d.cargo||'Cargo'}</div>
+          <div style={{ fontSize:22, fontWeight:900, color:'#111' }}>{cap(d.nombre)||'NOMBRE COMPLETO'}</div>
+          <div style={{ fontSize:11, color, fontWeight:600, marginTop:4, letterSpacing:'0.06em', textTransform:'uppercase' }}>{cap(d.cargo)||'Cargo'}</div>
           <div style={{ fontSize:9, color:'#777', marginTop:6, display:'flex', gap:12, flexWrap:'wrap' }}>
-            {d.email&&<span>{d.email}</span>}{d.telefono&&<span>{d.telefono}</span>}{d.ciudad&&<span>{d.ciudad}</span>}{d.linkedin&&<span>{d.linkedin}</span>}
+            {d.email&&<span>{d.email}</span>}{d.telefono&&<span>{d.telefono}</span>}{d.ciudad&&<span>{cap(d.ciudad)}</span>}{d.linkedin&&<span>{d.linkedin}</span>}
           </div>
+          {d.direccion&&<div style={{ fontSize:8, color:'#999', marginTop:3 }}>{d.direccion}</div>}
         </div>
         <div style={{ width:70, height:80, borderRadius:4, overflow:'hidden', border:`2px solid ${color}`, flexShrink:0, marginLeft:16 }}>
           {d.fotoBase64
@@ -170,7 +172,7 @@ function P2({ d, color, ff }) {
           }
         </div>
       </div>
-      {habs.length>0&&<div style={{ marginBottom:14 }}><STitle color={color}>Habilidades</STitle><div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>{habs.map((h,i)=><span key={i} style={{ padding:'4px 12px', background:`${color}15`, border:`1px solid ${color}40`, borderRadius:20, fontSize:9, color, fontWeight:600 }}>{h}</span>)}</div></div>}
+      {habs.length>0&&<div style={{ marginBottom:14 }}><STitle color={color}>Habilidades</STitle><div style={{ display:'flex', flexWrap:'wrap', gap:6 }}>{habs.map((h,i)=><span key={i} style={{ padding:'4px 12px', background:`${color}15`, border:`1px solid ${color}40`, borderRadius:20, fontSize:9, color, fontWeight:600 }}>{cap(h)}</span>)}</div></div>}
       {d.perfil&&<div style={{ marginBottom:14 }}><STitle color={color}>Perfil Ocupacional</STitle><p style={{ fontSize:9.5, color:'#444', lineHeight:1.7, margin:0 }}>{d.perfil}</p></div>}
       {(d.experiencia||[]).filter(e=>e.cargo).length>0&&(
         <div style={{ marginBottom:14 }}>
@@ -275,8 +277,8 @@ function P3({ d, color, ff, fs=1 }) {
   )
 }
 
-function P4({ d, color, ff }) {
-  const habs = habs6(d.habilidades)
+function P4({ d, color, ff, fs=1 }) {
+  const habs = habsStr6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   return (
@@ -333,8 +335,8 @@ function P4({ d, color, ff }) {
   )
 }
 
-function P5({ d, color, ff }) {
-  const habs = habs6(d.habilidades)
+function P5({ d, color, ff, fs=1 }) {
+  const habs = habsStr6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   return (
@@ -386,8 +388,8 @@ function P5({ d, color, ff }) {
   )
 }
 
-function P6({ d, color, ff }) {
-  const habs = habs6(d.habilidades)
+function P6({ d, color, ff, fs=1 }) {
+  const habs = habsStr6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   return (
@@ -436,8 +438,8 @@ function P6({ d, color, ff }) {
   )
 }
 
-function P7({ d, color, ff }) {
-  const habs = habs6(d.habilidades)
+function P7({ d, color, ff, fs=1 }) {
+  const habs = habsStr6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   const bg = color + '10'
