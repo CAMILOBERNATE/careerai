@@ -541,7 +541,7 @@ export default function CrearCV() {
   const [datos, setDatos] = useState(INICIAL)
   const [mejorando, setMejorando] = useState({})
   const [generandoPDF, setGenerandoPDF] = useState(false)
-  const [config, setConfig] = useState({ plantillaId:'p1', color:'#003DA5', fuente:'arial', fs:1 })
+  const [config, setConfig] = useState({ plantillaId:'p1', color:'#003DA5', fuente:'arial', fs:1.15 })
   const previewRef = useRef()
 
   const act = (k,v) => setDatos(d=>({...d,[k]:v}))
@@ -846,7 +846,7 @@ export default function CrearCV() {
 
         <div style={{ background:'#d0d0d0', overflow:'auto', padding:'20px', display:'flex', justifyContent:'center', alignItems:'flex-start' }}>
           <div style={{ width:794, background:'#fff', boxShadow:'0 8px 40px rgba(0,0,0,0.2)' }}>
-            <div ref={previewRef} style={{ width:794, minHeight:1123, background:'#fff' }}>
+            <div ref={previewRef} style={{ width:794, background:'#fff' }}>
               <Comp d={datos} color={config.color} ff={ff} fs={config.fs}/>
             </div>
           </div>
