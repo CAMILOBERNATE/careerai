@@ -602,8 +602,8 @@ export default function CrearCV() {
             return (
               <div key={p.id} onClick={()=>{ actCfg('plantillaId',p.id); actCfg('color',p.color) }}
                 style={{ border:`2px solid ${config.plantillaId===p.id?'var(--azul)':'var(--gris2)'}`, borderRadius:10, overflow:'hidden', cursor:'pointer', transition:'all 0.15s', transform:config.plantillaId===p.id?'translateY(-2px)':'none', boxShadow:config.plantillaId===p.id?'0 4px 16px rgba(0,61,165,0.15)':'none' }}>
-                <div style={{ height:90, overflow:'hidden', background:'#f5f5f5', position:'relative' }}>
-                  <div style={{ transform:'scale(0.24)', transformOrigin:'top left', width:'417%', height:'417%', pointerEvents:'none' }}>
+                <div style={{ height:160, overflow:'hidden', background:'#f5f5f5', position:'relative' }}>
+                  <div style={{ position:'absolute', top:0, left:0, width:794, height:1123, transform:'scale(0.185)', transformOrigin:'top left', pointerEvents:'none' }}>
                     <PComp d={DEMO} color={p.color} ff="Arial, sans-serif"/>
                   </div>
                 </div>
@@ -630,8 +630,8 @@ export default function CrearCV() {
           </div>
           <div style={card}>
             <div style={{ fontSize:11, fontWeight:700, color:'var(--texto)', marginBottom:8 }}>Vista previa</div>
-            <div style={{ background:'#f0f0f0', borderRadius:6, overflow:'hidden', border:'1px solid var(--gris2)', height:140 }}>
-              <div style={{ transform:'scale(0.28)', transformOrigin:'top left', width:'357%', height:'357%', pointerEvents:'none' }}>
+            <div style={{ background:'#f0f0f0', borderRadius:6, overflow:'hidden', border:'1px solid var(--gris2)', height:200, position:'relative' }}>
+              <div style={{ position:'absolute', top:0, left:0, width:794, height:1123, transform:'scale(0.185)', transformOrigin:'top left', pointerEvents:'none' }}>
                 <Comp d={DEMO} color={config.color} ff={ff}/>
               </div>
             </div>
