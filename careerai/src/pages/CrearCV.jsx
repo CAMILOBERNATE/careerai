@@ -15,9 +15,25 @@ const per = e => {
 
 const habs6 = h => {
   if (!h) return []
-  if (Array.isArray(h)) return h.filter(Boolean).slice(0, 8)
-  return h.split(',').map(x => x.trim()).filter(Boolean).slice(0, 8)
+  if (Array.isArray(h)) {
+    // Nuevo formato: [{nombre, nivel}]
+    if (h.length > 0 && typeof h[0] === 'object' && h[0].nombre !== undefined) {
+      return h.filter(x=>x.nombre).slice(0, 8)
+    }
+    // Formato viejo: ['string']
+    return h.filter(Boolean).slice(0, 8).map(x => ({ nombre: x, nivel: 'Bueno' }))
+  }
+  return h.split(',').map(x => ({ nombre: x.trim(), nivel: 'Bueno' })).filter(x=>x.nombre).slice(0, 8)
 }
+
+const cap = str => {
+  if (!str) return ''
+  return str.toLowerCase().replace(/(^\w|\s\w)/g, c => c.toUpperCase())
+}
+
+const NIVELES_HAB = ['Básico','Bueno','Muy bueno','Excelente']
+const nivelW = nivel => ({ 'Básico':'25%', 'Bueno':'50%', 'Muy bueno':'75%', 'Excelente':'100%' }[nivel]||'50%')
+const nivelBadgeColor = nivel => ({ 'Básico':'#94a3b8', 'Bueno':'#3b82f6', 'Muy bueno':'#8b5cf6', 'Excelente':'#10b981' }[nivel]||'#3b82f6')
 
 const idiomasStr = ids => {
   if (!ids) return ''
@@ -42,11 +58,10 @@ const INICIAL = {
   experiencia:[{ cargo:'',empresa:'',ciudad:'',mesInicio:'',anioInicio:'',mesFin:'',anioFin:'',actual:false,funciones:'',logros:'' }],
   educacion:[{ titulo:'',institucion:'',ciudad:'',mesInicio:'',anioInicio:'',mesFin:'',anioFin:'',actual:false }],
   cursos:[{ nombre:'',institucion:'',anio:'' }],
-  habilidades:[],
+  habilidades:[{ nombre:'', nivel:'Bueno' }],
   idiomas:[{ idioma:'', nivel:'Nativo' }],
 }
 
-// ─── HELPERS UI ───────────────────────────────────────────────────────────────
 function STitle({ color, children }) {
   return <div style={{ fontSize:8.5, fontWeight:700, color, textTransform:'uppercase', letterSpacing:'0.1em', borderBottom:`1.5px solid ${color}`, paddingBottom:3, marginBottom:7 }}>{children}</div>
 }
@@ -54,41 +69,38 @@ function MinTitle({ children }) {
   return <div style={{ fontSize:8, fontWeight:700, color:'#000', textTransform:'uppercase', letterSpacing:'0.12em', borderBottom:'1px solid #000', paddingBottom:2, marginBottom:6, marginTop:10 }}>{children}</div>
 }
 
-// ─── P1 FORMAL — sin foto ─────────────────────────────────────────────────────
-function P1({ d, color, ff }) {
+function P1({ d, color, ff, fs=1 }) {
   const habs = habs6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
   return (
     <div style={{ width:'100%', minHeight:'100%', fontFamily:ff, background:'#fff', display:'flex', flexDirection:'column' }}>
       <div style={{ background:color, padding:'18px 22px', color:'#fff' }}>
-        <div style={{ fontSize:20, fontWeight:900 }}>{d.nombre||'NOMBRE COMPLETO'}</div>
-        <div style={{ fontSize:10, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', marginTop:3, opacity:0.85 }}>{d.cargo||'Cargo'}</div>
-        <div style={{ fontSize:8.5, marginTop:6, opacity:0.75, display:'flex', gap:14, flexWrap:'wrap' }}>
-          {d.email&&<span>{d.email}</span>}
-          {d.telefono&&<span>{d.telefono}</span>}
-          {d.ciudad&&<span>{d.ciudad}</span>}
-          {d.linkedin&&<span>{d.linkedin}</span>}
+        <div style={{ fontSize:20*fs, fontWeight:900 }}>{cap(d.nombre)||'NOMBRE COMPLETO'}</div>
+        <div style={{ fontSize:10*fs, fontWeight:600, textTransform:'uppercase', letterSpacing:'0.1em', marginTop:3, opacity:0.85 }}>{cap(d.cargo)||'Cargo'}</div>
+        <div style={{ fontSize:8.5*fs, marginTop:6, opacity:0.75, display:'flex', gap:14, flexWrap:'wrap' }}>
+          {d.email&&<span>{d.email}</span>}{d.telefono&&<span>{d.telefono}</span>}{d.ciudad&&<span>{cap(d.ciudad)}</span>}{d.linkedin&&<span>{d.linkedin}</span>}
         </div>
+        {d.direccion&&<div style={{ fontSize:8*fs, marginTop:3, opacity:0.65 }}>{d.direccion}</div>}
       </div>
       <div style={{ height:3, background:color, opacity:0.2 }}/>
       <div style={{ flex:1, display:'flex' }}>
         <div style={{ flex:'0 0 62%', padding:'14px 16px 14px 22px', borderRight:`1px solid ${color}22` }}>
-          {d.perfil&&<div style={{ marginBottom:12 }}><STitle color={color}>Perfil Ocupacional</STitle><p style={{ fontSize:9, color:'#444', lineHeight:1.65, margin:0 }}>{d.perfil}</p></div>}
+          {d.perfil&&<div style={{ marginBottom:12 }}><STitle color={color}>Perfil Ocupacional</STitle><p style={{ fontSize:9*fs, color:'#444', lineHeight:1.65, margin:0 }}>{d.perfil}</p></div>}
           {(d.experiencia||[]).filter(e=>e.cargo).length>0&&(
             <div style={{ marginBottom:12 }}>
               <STitle color={color}>Experiencia Laboral</STitle>
               {(d.experiencia||[]).filter(e=>e.cargo).map((e,i)=>(
                 <div key={i} style={{ marginBottom:10 }}>
-                  <div style={{ fontSize:10, fontWeight:700, color:'#111' }}>{e.cargo}</div>
-                  <div style={{ fontSize:9, color, fontWeight:600 }}>{e.empresa}{e.ciudad&&` · ${e.ciudad}`}</div>
-                  <div style={{ fontSize:8, color:'#888', marginBottom:4 }}>{per(e)}</div>
+                  <div style={{ fontSize:10*fs, fontWeight:700, color:'#111' }}>{cap(e.cargo)}</div>
+                  <div style={{ fontSize:9*fs, color, fontWeight:600 }}>{cap(e.empresa)}{e.ciudad&&` · ${cap(e.ciudad)}`}</div>
+                  <div style={{ fontSize:8*fs, color:'#888', marginBottom:4 }}>{per(e)}</div>
                   {e.funciones&&e.funciones.split('\n').filter(Boolean).map((f,j)=>(
-                    <div key={j} style={{ fontSize:8.5, color:'#444', display:'flex', gap:5, marginBottom:2 }}>
+                    <div key={j} style={{ fontSize:8.5*fs, color:'#444', display:'flex', gap:5, marginBottom:2 }}>
                       <span style={{ color, fontWeight:700, flexShrink:0 }}>•</span>{f.replace(/^[-•]\s*/,'')}
                     </div>
                   ))}
-                  {e.logros&&<div style={{ fontSize:8.5, color:'#666', fontStyle:'italic', marginTop:2 }}>{e.logros}</div>}
+                  {e.logros&&<div style={{ fontSize:8.5*fs, color:'#666', fontStyle:'italic', marginTop:2 }}>{e.logros}</div>}
                 </div>
               ))}
             </div>
@@ -98,9 +110,9 @@ function P1({ d, color, ff }) {
               <STitle color={color}>Formación Académica</STitle>
               {(d.educacion||[]).filter(e=>e.titulo).map((e,i)=>(
                 <div key={i} style={{ marginBottom:8 }}>
-                  <div style={{ fontSize:10, fontWeight:700, color:'#111' }}>{e.titulo}</div>
-                  <div style={{ fontSize:9, color:'#666' }}>{e.institucion}{e.ciudad&&` · ${e.ciudad}`}</div>
-                  <div style={{ fontSize:8, color:'#aaa' }}>{per(e)}</div>
+                  <div style={{ fontSize:10*fs, fontWeight:700, color:'#111' }}>{cap(e.titulo)}</div>
+                  <div style={{ fontSize:9*fs, color:'#666' }}>{cap(e.institucion)}{e.ciudad&&` · ${cap(e.ciudad)}`}</div>
+                  <div style={{ fontSize:8*fs, color:'#aaa' }}>{per(e)}</div>
                 </div>
               ))}
             </div>
@@ -111,24 +123,22 @@ function P1({ d, color, ff }) {
             <div style={{ marginBottom:12 }}>
               <STitle color={color}>Habilidades</STitle>
               {habs.map((h,i)=>(
-                <div key={i} style={{ marginBottom:5 }}>
-                  <div style={{ fontSize:8.5, color:'#333', marginBottom:2 }}>{h}</div>
-                  <div style={{ height:4, background:'#e0e0e0', borderRadius:2 }}>
-                    <div style={{ height:'100%', width:`${85-(i*8)}%`, background:color, borderRadius:2 }}/>
-                  </div>
+                <div key={i} style={{ marginBottom:7, display:'flex', alignItems:'center', justifyContent:'space-between', gap:6 }}>
+                  <div style={{ fontSize:8.5*fs, color:'#333', flex:1 }}>{cap(h.nombre||h)}</div>
+                  <span style={{ fontSize:7.5*fs, padding:'2px 6px', borderRadius:10, background:nivelBadgeColor(h.nivel||'Bueno'), color:'#fff', fontWeight:700, flexShrink:0 }}>{h.nivel||'Bueno'}</span>
                 </div>
               ))}
             </div>
           )}
-          {idStr&&<div style={{ marginBottom:12 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:8.5, color:'#333' }}>{idStr}</div></div>}
+          {idStr&&<div style={{ marginBottom:12 }}><STitle color={color}>Idiomas</STitle><div style={{ fontSize:8.5*fs, color:'#333' }}>{idStr}</div></div>}
           {cursos.length>0&&(
             <div>
               <STitle color={color}>Cursos</STitle>
               {cursos.map((c,i)=>(
                 <div key={i} style={{ marginBottom:6 }}>
-                  <div style={{ fontSize:8.5, fontWeight:700, color:'#222' }}>{c.nombre}</div>
-                  {c.institucion&&<div style={{ fontSize:8, color:'#666' }}>{c.institucion}</div>}
-                  {c.anio&&<div style={{ fontSize:7.5, color:'#aaa' }}>{c.anio}</div>}
+                  <div style={{ fontSize:8.5*fs, fontWeight:700, color:'#222' }}>{cap(c.nombre)}</div>
+                  {c.institucion&&<div style={{ fontSize:8*fs, color:'#666' }}>{cap(c.institucion)}</div>}
+                  {c.anio&&<div style={{ fontSize:7.5*fs, color:'#aaa' }}>{c.anio}</div>}
                 </div>
               ))}
             </div>
@@ -139,7 +149,6 @@ function P1({ d, color, ff }) {
   )
 }
 
-// ─── P2 PROFESIONAL — con foto ────────────────────────────────────────────────
 function P2({ d, color, ff }) {
   const habs = habs6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
@@ -151,10 +160,7 @@ function P2({ d, color, ff }) {
           <div style={{ fontSize:22, fontWeight:900, color:'#111' }}>{d.nombre||'NOMBRE COMPLETO'}</div>
           <div style={{ fontSize:11, color, fontWeight:600, marginTop:4, letterSpacing:'0.06em', textTransform:'uppercase' }}>{d.cargo||'Cargo'}</div>
           <div style={{ fontSize:9, color:'#777', marginTop:6, display:'flex', gap:12, flexWrap:'wrap' }}>
-            {d.email&&<span>{d.email}</span>}
-            {d.telefono&&<span>{d.telefono}</span>}
-            {d.ciudad&&<span>{d.ciudad}</span>}
-            {d.linkedin&&<span>{d.linkedin}</span>}
+            {d.email&&<span>{d.email}</span>}{d.telefono&&<span>{d.telefono}</span>}{d.ciudad&&<span>{d.ciudad}</span>}{d.linkedin&&<span>{d.linkedin}</span>}
           </div>
         </div>
         <div style={{ width:70, height:80, borderRadius:4, overflow:'hidden', border:`2px solid ${color}`, flexShrink:0, marginLeft:16 }}>
@@ -198,8 +204,7 @@ function P2({ d, color, ff }) {
   )
 }
 
-// ─── P3 CREATIVA — con foto ───────────────────────────────────────────────────
-function P3({ d, color, ff }) {
+function P3({ d, color, ff, fs=1 }) {
   const habs = habs6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
   const cursos = (d.cursos||[]).filter(c=>c.nombre).slice(0,4)
@@ -213,23 +218,24 @@ function P3({ d, color, ff }) {
           }
         </div>
         <div style={{ textAlign:'center' }}>
-          <div style={{ fontSize:12, fontWeight:900, color:'#fff', lineHeight:1.2 }}>{d.nombre||'NOMBRE'}</div>
-          <div style={{ fontSize:8.5, color, fontWeight:600, marginTop:4, textTransform:'uppercase', letterSpacing:'0.08em' }}>{d.cargo||''}</div>
+          <div style={{ fontSize:12, fontWeight:900, color:'#fff', lineHeight:1.2 }}>{cap(d.nombre)||'NOMBRE'}</div>
+          <div style={{ fontSize:8.5, color, fontWeight:600, marginTop:4, textTransform:'uppercase', letterSpacing:'0.08em' }}>{cap(d.cargo)||''}</div>
         </div>
         <div style={{ borderTop:'0.5px solid rgba(255,255,255,0.15)', paddingTop:10 }}>
           <div style={{ fontSize:8, fontWeight:700, color, textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>Contacto</div>
           {d.email&&<div style={{ fontSize:7.5, color:'rgba(255,255,255,0.75)', marginBottom:3 }}>{d.email}</div>}
           {d.telefono&&<div style={{ fontSize:7.5, color:'rgba(255,255,255,0.75)', marginBottom:3 }}>{d.telefono}</div>}
-          {d.ciudad&&<div style={{ fontSize:7.5, color:'rgba(255,255,255,0.75)', marginBottom:3 }}>{d.ciudad}</div>}
+          {d.ciudad&&<div style={{ fontSize:7.5, color:'rgba(255,255,255,0.75)', marginBottom:3 }}>{cap(d.ciudad)}</div>}
+          {d.direccion&&<div style={{ fontSize:7, color:'rgba(255,255,255,0.6)', marginBottom:3 }}>{d.direccion}</div>}
           {d.linkedin&&<div style={{ fontSize:7.5, color:'rgba(255,255,255,0.75)', marginBottom:3 }}>{d.linkedin}</div>}
         </div>
         {habs.length>0&&(
           <div style={{ borderTop:'0.5px solid rgba(255,255,255,0.15)', paddingTop:10 }}>
             <div style={{ fontSize:8, fontWeight:700, color, textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:8 }}>Habilidades</div>
             {habs.map((h,i)=>(
-              <div key={i} style={{ marginBottom:6 }}>
-                <div style={{ fontSize:7.5, color:'rgba(255,255,255,0.8)', marginBottom:2 }}>{h}</div>
-                <div style={{ height:3, background:'rgba(255,255,255,0.1)', borderRadius:2 }}><div style={{ height:'100%', width:`${80-(i*8)}%`, background:color, borderRadius:2 }}/></div>
+              <div key={i} style={{ marginBottom:6, display:'flex', alignItems:'center', justifyContent:'space-between', gap:4 }}>
+                <div style={{ fontSize:7.5, color:'rgba(255,255,255,0.8)' }}>{cap(h.nombre||h)}</div>
+                <span style={{ fontSize:7, padding:'1px 5px', borderRadius:8, background:nivelBadgeColor(h.nivel||'Bueno'), color:'#fff', fontWeight:700, flexShrink:0 }}>{h.nivel||'Bueno'}</span>
               </div>
             ))}
           </div>
@@ -238,19 +244,19 @@ function P3({ d, color, ff }) {
         {cursos.length>0&&(
           <div style={{ borderTop:'0.5px solid rgba(255,255,255,0.15)', paddingTop:10 }}>
             <div style={{ fontSize:8, fontWeight:700, color, textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>Cursos</div>
-            {cursos.map((c,i)=><div key={i} style={{ marginBottom:5 }}><div style={{ fontSize:7.5, fontWeight:700, color:'rgba(255,255,255,0.85)' }}>{c.nombre}</div>{c.institucion&&<div style={{ fontSize:7, color:'rgba(255,255,255,0.55)' }}>{c.institucion}</div>}</div>)}
+            {cursos.map((c,i)=><div key={i} style={{ marginBottom:5 }}><div style={{ fontSize:7.5, fontWeight:700, color:'rgba(255,255,255,0.85)' }}>{cap(c.nombre)}</div>{c.institucion&&<div style={{ fontSize:7, color:'rgba(255,255,255,0.55)' }}>{cap(c.institucion)}</div>}</div>)}
           </div>
         )}
       </div>
       <div style={{ flex:1, padding:'22px 18px' }}>
-        {d.perfil&&<div style={{ marginBottom:14 }}><STitle color={color}>Perfil Ocupacional</STitle><p style={{ fontSize:9, color:'#444', lineHeight:1.65, margin:0 }}>{d.perfil}</p></div>}
+        {d.perfil&&<div style={{ marginBottom:14 }}><STitle color={color}>Perfil Ocupacional</STitle><p style={{ fontSize:9*fs, color:'#444', lineHeight:1.65, margin:0 }}>{d.perfil}</p></div>}
         {(d.experiencia||[]).filter(e=>e.cargo).length>0&&(
           <div style={{ marginBottom:14 }}>
             <STitle color={color}>Experiencia Laboral</STitle>
             {(d.experiencia||[]).filter(e=>e.cargo).map((e,i)=>(
               <div key={i} style={{ marginBottom:10 }}>
-                <div style={{ fontSize:10.5, fontWeight:700, color:'#111' }}>{e.cargo}</div>
-                <div style={{ fontSize:9, color, fontWeight:600 }}>{e.empresa}{e.ciudad&&` · ${e.ciudad}`}</div>
+                <div style={{ fontSize:10.5, fontWeight:700, color:'#111' }}>{cap(e.cargo)}</div>
+                <div style={{ fontSize:9, color, fontWeight:600 }}>{cap(e.empresa)}{e.ciudad&&` · ${cap(e.ciudad)}`}</div>
                 <div style={{ fontSize:8, color:'#999', marginBottom:4 }}>{per(e)}</div>
                 {e.funciones&&e.funciones.split('\n').filter(Boolean).map((f,j)=><div key={j} style={{ fontSize:8.5, color:'#555', display:'flex', gap:5, marginBottom:2 }}><span style={{ color, fontWeight:700 }}>›</span>{f.replace(/^[-•]\s*/,'')}</div>)}
                 {e.logros&&<div style={{ fontSize:8.5, color:'#666', fontStyle:'italic', marginTop:2 }}>{e.logros}</div>}
@@ -261,7 +267,7 @@ function P3({ d, color, ff }) {
         {(d.educacion||[]).filter(e=>e.titulo).length>0&&(
           <div>
             <STitle color={color}>Formación Académica</STitle>
-            {(d.educacion||[]).filter(e=>e.titulo).map((e,i)=><div key={i} style={{ marginBottom:8 }}><div style={{ fontSize:10, fontWeight:700, color:'#111' }}>{e.titulo}</div><div style={{ fontSize:9, color:'#666' }}>{e.institucion}{e.ciudad&&` · ${e.ciudad}`} <span style={{ color:'#bbb' }}>{per(e)}</span></div></div>)}
+            {(d.educacion||[]).filter(e=>e.titulo).map((e,i)=><div key={i} style={{ marginBottom:8 }}><div style={{ fontSize:10, fontWeight:700, color:'#111' }}>{cap(e.titulo)}</div><div style={{ fontSize:9, color:'#666' }}>{cap(e.institucion)}{e.ciudad&&` · ${cap(e.ciudad)}`} <span style={{ color:'#bbb' }}>{per(e)}</span></div></div>)}
           </div>
         )}
       </div>
@@ -269,7 +275,6 @@ function P3({ d, color, ff }) {
   )
 }
 
-// ─── P4 CORPORATIVA — sin foto ────────────────────────────────────────────────
 function P4({ d, color, ff }) {
   const habs = habs6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
@@ -328,7 +333,6 @@ function P4({ d, color, ff }) {
   )
 }
 
-// ─── P5 MINIMALISTA — sin foto ────────────────────────────────────────────────
 function P5({ d, color, ff }) {
   const habs = habs6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
@@ -382,7 +386,6 @@ function P5({ d, color, ff }) {
   )
 }
 
-// ─── P6 EJECUTIVA — con foto ──────────────────────────────────────────────────
 function P6({ d, color, ff }) {
   const habs = habs6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
@@ -433,7 +436,6 @@ function P6({ d, color, ff }) {
   )
 }
 
-// ─── P7 PREMIUM — sin foto ────────────────────────────────────────────────────
 function P7({ d, color, ff }) {
   const habs = habs6(d.habilidades)
   const idStr = idiomasStr(d.idiomas)
@@ -483,7 +485,6 @@ function P7({ d, color, ff }) {
   )
 }
 
-// ─── CATÁLOGO ─────────────────────────────────────────────────────────────────
 const PLANTILLAS = [
   { id:'p1', nombre:'Formal',      desc:'Sin foto · 2 col · sidebar barras',    color:'#003DA5', conFoto:false, Comp:P1 },
   { id:'p2', nombre:'Profesional', desc:'Con foto · 1 col · chips habilidades', color:'#1E5C3A', conFoto:true,  Comp:P2 },
@@ -494,40 +495,51 @@ const PLANTILLAS = [
   { id:'p7', nombre:'Premium',     desc:'Sin foto · header color · cards',      color:'#117A65', conFoto:false, Comp:P7 },
 ]
 
-// ─── PDF ──────────────────────────────────────────────────────────────────────
+// ─── PDF CORREGIDO ────────────────────────────────────────────────────────────
 async function descargarPDF(ref, nombre) {
   if (!ref) return
-  const canvas = await html2canvas(ref, { scale:2, useCORS:true, backgroundColor:'#ffffff', logging:false })
-  const imgData = canvas.toDataURL('image/png')
-  const pdf = new jsPDF({ unit:'mm', format:'a4', orientation:'portrait' })
-  const pdfW = pdf.internal.pageSize.getWidth()
-  const pdfH = pdf.internal.pageSize.getHeight()
-  const ratio = pdfW / canvas.width
-  const scaledH = canvas.height * ratio
-  if (scaledH <= pdfH) {
-    pdf.addImage(imgData,'PNG',0,0,pdfW,scaledH)
-  } else {
-    let y = 0
-    while (y < canvas.height) {
-      const pageH = Math.min(pdfH/ratio, canvas.height-y)
-      const pc = document.createElement('canvas')
-      pc.width = canvas.width; pc.height = pageH
-      pc.getContext('2d').drawImage(canvas,0,y,canvas.width,pageH,0,0,canvas.width,pageH)
-      if(y>0) pdf.addPage()
-      pdf.addImage(pc.toDataURL('image/png'),'PNG',0,0,pdfW,pageH*ratio)
-      y += pageH
+  try {
+    const canvas = await html2canvas(ref, {
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false,
+      imageTimeout: 0,
+    })
+    const imgData = canvas.toDataURL('image/jpeg', 0.95)
+    const pdf = new jsPDF({ unit:'mm', format:'a4', orientation:'portrait' })
+    const pdfW = pdf.internal.pageSize.getWidth()
+    const pdfH = pdf.internal.pageSize.getHeight()
+    const ratio = pdfW / canvas.width
+    const scaledH = canvas.height * ratio
+    if (scaledH <= pdfH) {
+      pdf.addImage(imgData, 'JPEG', 0, 0, pdfW, scaledH)
+    } else {
+      let y = 0
+      while (y < canvas.height) {
+        const pageH = Math.min(pdfH/ratio, canvas.height-y)
+        const pc = document.createElement('canvas')
+        pc.width = canvas.width; pc.height = pageH
+        pc.getContext('2d').drawImage(canvas,0,y,canvas.width,pageH,0,0,canvas.width,pageH)
+        if(y>0) pdf.addPage()
+        pdf.addImage(pc.toDataURL('image/jpeg', 0.95), 'JPEG', 0, 0, pdfW, pageH*ratio)
+        y += pageH
+      }
     }
+    pdf.save(`CV_${(nombre||'MiCV').replace(/\s+/g,'_')}.pdf`)
+  } catch(err) {
+    console.error('Error PDF:', err)
+    alert('Error al generar el PDF: ' + err.message)
   }
-  pdf.save(`CV_${(nombre||'MiCV').replace(/\s+/g,'_')}.pdf`)
 }
 
-// ─── COMPONENTE PRINCIPAL ─────────────────────────────────────────────────────
 export default function CrearCV() {
   const [paso, setPaso] = useState('selector')
   const [datos, setDatos] = useState(INICIAL)
   const [mejorando, setMejorando] = useState({})
   const [generandoPDF, setGenerandoPDF] = useState(false)
-  const [config, setConfig] = useState({ plantillaId:'p1', color:'#003DA5', fuente:'arial' })
+  const [config, setConfig] = useState({ plantillaId:'p1', color:'#003DA5', fuente:'arial', fs:1 })
   const previewRef = useRef()
 
   const act = (k,v) => setDatos(d=>({...d,[k]:v}))
@@ -535,7 +547,7 @@ export default function CrearCV() {
   const actExp = (i,k,v) => { const e=[...datos.experiencia]; e[i][k]=v; setDatos(d=>({...d,experiencia:e})) }
   const actEdu = (i,k,v) => { const e=[...datos.educacion]; e[i][k]=v; setDatos(d=>({...d,educacion:e})) }
   const actCur = (i,k,v) => { const c=[...datos.cursos]; c[i][k]=v; setDatos(d=>({...d,cursos:c})) }
-  const actHab = (i,v) => { const h=[...(datos.habilidades||[])]; h[i]=v; act('habilidades',h) }
+  const actHab = (i,k,v) => { const h=[...(datos.habilidades||[])]; h[i]={...h[i],[k]:v}; act('habilidades',h) }
   const actId  = (i,k,v) => { const ids=[...(datos.idiomas||[])]; ids[i]={...ids[i],[k]:v}; act('idiomas',ids) }
 
   const mejorar = async (campo, texto, tipo) => {
@@ -587,7 +599,6 @@ export default function CrearCV() {
 
   const DEMO = { nombre:'Laura García', cargo:'Diseñadora UX', email:'laura@email.com', telefono:'300 000 0000', ciudad:'Bogotá', direccion:'', linkedin:'linkedin.com/in/laura', perfil:'Profesional con experiencia en diseño digital.', fotoBase64:'', experiencia:[{ cargo:'Diseñadora Sr', empresa:'Empresa XYZ', ciudad:'Bogotá', mesInicio:'03', anioInicio:'2021', mesFin:'', anioFin:'', actual:true, funciones:'Diseño de interfaces\nPrototipos', logros:'' }], educacion:[{ titulo:'Diseño Gráfico', institucion:'Univ. Nacional', ciudad:'', mesInicio:'', anioInicio:'2016', mesFin:'', anioFin:'2020', actual:false }], cursos:[{ nombre:'UX Research', institucion:'Google', anio:'2022' }], habilidades:['Figma','Photoshop','UX','Liderazgo'], idiomas:[{ idioma:'Español', nivel:'Nativo' },{ idioma:'Inglés', nivel:'B2' }] }
 
-  // ── SELECTOR ─────────────────────────────────────────────────────────────
   if (paso === 'selector') return (
     <div style={{ height:'100vh', display:'flex', flexDirection:'column' }}>
       <div style={{ padding:'14px 24px', borderBottom:'1px solid var(--gris2)', background:'var(--blanco)' }}>
@@ -647,7 +658,6 @@ export default function CrearCV() {
     </div>
   )
 
-  // ── EDITOR ────────────────────────────────────────────────────────────────
   return (
     <div style={{ height:'100vh', display:'flex', flexDirection:'column' }}>
       <div style={{ borderBottom:'1px solid var(--gris2)', background:'var(--blanco)', flexShrink:0 }}>
@@ -664,6 +674,11 @@ export default function CrearCV() {
             <select value={config.fuente} onChange={e=>actCfg('fuente',e.target.value)} style={{...sel,fontSize:11,padding:'3px 6px',width:'auto'}}>
               {FUENTES.map(f=><option key={f.id} value={f.id}>{f.nombre}</option>)}
             </select>
+            <div style={{ display:'flex', border:'1px solid var(--gris2)', borderRadius:6, overflow:'hidden' }}>
+              {[['S',0.88],['M',1],['L',1.15]].map(([l,v])=>(
+                <button key={l} onClick={()=>actCfg('fs',v)} style={{ padding:'4px 8px', border:'none', background:config.fs===v?'var(--azul)':'var(--blanco)', color:config.fs===v?'white':'var(--texto2)', fontSize:11, fontWeight:700, cursor:'pointer' }}>{l}</button>
+              ))}
+            </div>
             <button onClick={handleDescargar} disabled={generandoPDF} style={{ padding:'7px 16px', background:generandoPDF?'var(--gris2)':'var(--verde)', border:'none', borderRadius:7, color:'white', fontWeight:700, fontSize:12, cursor:generandoPDF?'not-allowed':'pointer' }}>
               {generandoPDF?'⏳...':'⬇ PDF'}
             </button>
@@ -674,7 +689,6 @@ export default function CrearCV() {
       <div style={{ flex:1, display:'grid', gridTemplateColumns:'380px 1fr', overflow:'hidden' }}>
         <div style={{ overflowY:'auto', borderRight:'1px solid var(--gris2)', padding:'12px 14px', background:'var(--gris)' }}>
 
-          {/* Datos personales */}
           <div style={card}>
             <div style={{ fontSize:12, fontWeight:700, color:'var(--azul)', marginBottom:10 }}>Datos Personales</div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
@@ -697,7 +711,6 @@ export default function CrearCV() {
             )}
           </div>
 
-          {/* Perfil */}
           <div style={card}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
               <div style={{ fontSize:12, fontWeight:700, color:'var(--azul)' }}>Perfil Ocupacional</div>
@@ -706,7 +719,6 @@ export default function CrearCV() {
             <textarea value={datos.perfil} onChange={e=>act('perfil',e.target.value)} placeholder="Describe tu perfil..." rows={3} style={{...inp,resize:'vertical',lineHeight:1.5}}/>
           </div>
 
-          {/* Experiencia */}
           <div style={card}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
               <div style={{ fontSize:12, fontWeight:700, color:'var(--azul)' }}>Experiencia Laboral</div>
@@ -742,7 +754,6 @@ export default function CrearCV() {
             ))}
           </div>
 
-          {/* Educación */}
           <div style={card}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
               <div style={{ fontSize:12, fontWeight:700, color:'var(--azul)' }}>Educación</div>
@@ -764,7 +775,6 @@ export default function CrearCV() {
             ))}
           </div>
 
-          {/* Cursos */}
           <div style={card}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
               <div style={{ fontSize:12, fontWeight:700, color:'var(--azul)' }}>Cursos</div>
@@ -782,22 +792,23 @@ export default function CrearCV() {
             ))}
           </div>
 
-          {/* Habilidades */}
           <div style={card}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
               <div style={{ fontSize:12, fontWeight:700, color:'var(--azul)' }}>Habilidades</div>
-              <button onClick={()=>act('habilidades',[...(datos.habilidades||[]),''])} style={{ padding:'4px 8px', background:'rgba(0,61,165,0.1)', border:'1px solid rgba(0,61,165,0.3)', borderRadius:6, color:'var(--azul)', fontSize:11, fontWeight:700, cursor:'pointer' }}>+ Añadir</button>
+              <button onClick={()=>act('habilidades',[...(datos.habilidades||[]),{ nombre:'', nivel:'Bueno' }])} style={{ padding:'4px 8px', background:'rgba(0,61,165,0.1)', border:'1px solid rgba(0,61,165,0.3)', borderRadius:6, color:'var(--azul)', fontSize:11, fontWeight:700, cursor:'pointer' }}>+ Añadir</button>
             </div>
             {(datos.habilidades||[]).map((h,i)=>(
               <div key={i} style={{ display:'flex', gap:6, marginBottom:6, alignItems:'center' }}>
-                <input value={h} onChange={e=>actHab(i,e.target.value)} placeholder={`Habilidad ${i+1}`} style={{...inp,marginBottom:0}}/>
+                <input value={h.nombre||''} onChange={e=>actHab(i,'nombre',e.target.value)} placeholder={`Habilidad ${i+1}`} style={{...inp,marginBottom:0,flex:2}}/>
+                <select value={h.nivel||'Bueno'} onChange={e=>actHab(i,'nivel',e.target.value)} style={{...sel,marginBottom:0,flex:1,padding:'7px 6px',fontSize:11}}>
+                  {NIVELES_HAB.map(n=><option key={n} value={n}>{n}</option>)}
+                </select>
                 <button onClick={()=>act('habilidades',(datos.habilidades||[]).filter((_,j)=>j!==i))} style={{ padding:'6px 10px', background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)', borderRadius:6, color:'#ef4444', fontSize:13, cursor:'pointer', flexShrink:0 }}>×</button>
               </div>
             ))}
             {(!datos.habilidades||datos.habilidades.length===0)&&<div style={{ fontSize:11, color:'var(--texto2)', textAlign:'center', padding:'8px 0' }}>Presiona "+ Añadir" para agregar habilidades</div>}
           </div>
 
-          {/* Idiomas */}
           <div style={card}>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
               <div style={{ fontSize:12, fontWeight:700, color:'var(--azul)' }}>Idiomas</div>
@@ -831,11 +842,10 @@ export default function CrearCV() {
           </div>
         </div>
 
-        {/* PREVIEW */}
         <div style={{ background:'#d0d0d0', overflow:'auto', padding:'20px', display:'flex', justifyContent:'center', alignItems:'flex-start' }}>
           <div style={{ width:794, background:'#fff', boxShadow:'0 8px 40px rgba(0,0,0,0.2)' }}>
             <div ref={previewRef} style={{ width:794, minHeight:1123, background:'#fff' }}>
-              <Comp d={datos} color={config.color} ff={ff}/>
+              <Comp d={datos} color={config.color} ff={ff} fs={config.fs}/>
             </div>
           </div>
         </div>
